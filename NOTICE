@@ -1,0 +1,16 @@
+Cisco NX-OS assets for itential/assets
+======================================
+
+This repository stages a contribution to https://github.com/itential/assets, which is licensed
+under the Apache License 2.0 (see LICENSE, copied from that repository).
+
+Files copied unchanged from itential/assets (commit a54717f), used as build inputs:
+  build/nxos.project.json      <- Cisco/NX-OS/Studio Projects/Cisco NX-OS.project.json
+  build/ios.project.json       <- Cisco/IOS/Studio Projects/Cisco IOS.project.json
+  build/gc-ios-*.json          <- Cisco/IOS/Golden Configurations/*.json
+  build/netbox-latest.json     <- NetBox/OpenAPIs/netbox-latest.json
+
+Derived from those files:
+  build/netbox-latest-params.json  the declared parameters of dcim_devices_list, used by verify.py
+
+Cisco/NX-OS/ is derived from those files; build/ documents every change.

@@ -1,0 +1,8 @@
+Ethernet1/1.100 is up
+admin state is up, Dedicated Interface
+  Hardware: 1000/10000 Ethernet, address: 5087.89a1.d8d6 (bia 5087.89a1.d8d6)
+  Description: test
+  Internet Address is 10.0.0.2/30
+  MTU 1500 bytes, BW 10000000 Kbit, DLY 10 usec
+  reliability 255/255, txload 1/255, rxload 1/255
+  Encapsulation 802.1Q Virtual LAN, Vlan ID 100, medium is broadcast

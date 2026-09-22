@@ -66,7 +66,6 @@ way on 2026-09-21 and 2026-09-22; the results are in `PR-DESCRIPTION.md`.
 ## Open Before Submitting Upstream
 
 - **Confirm 6.5.2 is still the current GA release** of Itential Platform (upstream checklist).
-- **Re-import the 15-component build** on a Platform and confirm 15 of 15 components.
 
 ## Submitting Upstream
 

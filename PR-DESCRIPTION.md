@@ -24,8 +24,8 @@ successful run. Customers can extend it from there.
   Itential Gateway branding, Table of Contents, node attributes, and a "Before importing"
   note next to every environment-specific value.
 
-Every workflow except NX-OS Upgrade was **run against a real Nexus 9000v through the
-Platform** (see Testing). That run found defects that no offline check could, two of them
+Every workflow was **run against a real Nexus 9000v through the Platform** (see Testing);
+NX-OS Upgrade up to, but not including, the install that reloads the switch. That run found defects that no offline check could, two of them
 inherited from Cisco IOS. All are fixed here and described below.
 
 ## Removed from the Existing NX-OS Project
@@ -98,9 +98,10 @@ in the README next to its workflow:
 
 ## Known Issues Not Changed Here
 
-- **NX-OS Upgrade was not run against a device.** It needs a second NX-OS image staged on the
-  switch, and the install reloads it. Its checks were tested offline against real NX-OS
-  `show version` and `dir` output. The Install task's success lines (`Finishing the upgrade`,
+- **NX-OS Upgrade's install step was not run against a device.** It needs a second NX-OS image
+  staged on the switch, and the install reloads it. The workflow was started on the switch and
+  stopped, as designed, at File Verification; its checks were also tested offline against real
+  NX-OS `show version` and `dir` output. The Install task's success lines (`Finishing the upgrade`,
   `Install has been successful`) follow Cisco's documented `install all` output and were not
   captured. If an install ends without either, the workflow waits out the Show Version retries
   before reporting failure; its output is in `installOutput`.
@@ -115,9 +116,11 @@ in the README next to its workflow:
 
 **Platform:** Itential Platform 6.5.2, Itential Gateway 5.5.2.
 
-**Import.** The previous 19-component build and all three trees were imported through the
-Platform UI and read back through the API, component by component, because the importer can
-drop a component silently. <!-- re-import the 15-component build and confirm 15 of 15 -->
+**Import.** The 15-component project was imported through the Platform UI and read back through
+the API: 15 of 15 components in the four folders, and NX-OS Upgrade's tasks, transitions and
+all four upgrade command templates match the shipped file exactly. Checked component by
+component, because the importer can drop a component silently. The three trees were imported
+the same way and match the exported files line for line.
 
 **Real Nexus 9000v.** A private Cisco DevNet sandbox reservation, NX-OS 10.4(2), onboarded
 through Inventory Manager with netmiko's `cisco_nxos` driver and published to Configuration
@@ -130,6 +133,7 @@ workflows, their forms, templates and trees are unchanged by the restructure:
 | Port Turn Up (`Ethernet1/20.100`, `Ethernet1/20.200`) | Complete, all tasks green, started from Studio and by API. The switch's running config matches the rendered template exactly; the parent is admin-up |
 | Create & Update Inventory from NetBox | Complete on the **create** path (new inventory created, two nodes populated) and on the **update** path (drift reconciled in both directions) |
 | Clear & Delete Inventory | Complete; the inventory is removed |
+| NX-OS Upgrade, safe start (`version: 10.4(2)`, the running image) | Started as shipped with device, version and image path only. Pre Check passed; File Verification stopped the run because the switch already runs the target version, so Install never ran and the switch did not reload. The image check passed live (`dir` listing, `bytes total`) |
 
 The sandbox port has no link, so the sub-interface is operationally `down (Parent interface
 down)` with the parent admin-up. That's expected on an unconnected virtual port.

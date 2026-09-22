@@ -124,7 +124,7 @@ assert inv_wf["transitions"][_get][_create]["state"] == "error"
 
 # ------------------------------------------------- port turn up wiring
 # Upstream IOS points these at the generic "Pre and Post Checks" template
-# (which lives in the Software Upgrade folder and has no NX-OS counterpart),
+# (the Software Upgrade snapshot, which checks nothing about the interface),
 # leaving its own interface-specific checks unreferenced. Wire ours to the
 # interface checks instead -- the merged object already carries
 # type/interface/subInterface, which is what those templates interpolate.
@@ -208,6 +208,63 @@ for tid, t in inv["tasks"].items():
         # integration instance created from the NetBox:latest model. It cannot be
         # "NetBox" on a platform that already runs a classic adapter by that name.
         inc["adapter_id"] = "netbox-latest"
+
+# ---------------------------------------------------------- NX-OS Upgrade
+# IOS Upgrade sets the boot variable through Gateway 5 (Boot Marker Config -> Send
+# Config -> Eval) and then schedules `reload in 1`. NX-OS does both in one command:
+# `install all nxos <image> non-interruptive` runs the compatibility checks, sets the
+# boot variable and reloads the switch. So the IOS Reload task becomes Install, its
+# evaluation becomes Eval Install, and the five boot-marker tasks go -- including Get
+# Device Details and Inventory Object, which only fed Send Config. Everything else
+# (pre-check, file verification, the Show Version reattempt loop, post-check, the
+# success and failure responses) stays exactly as IOS ships it, task ids included.
+upg = by[("workflow", "NX-OS Upgrade")]["document"]
+tasks, trans = upg["tasks"], upg["transitions"]
+BOOT_MARKER = {"f247": "Get Device Details", "841a": "Inventory Object",
+               "14cc": "Boot Marker Config", "5c0d": "Send Config: Boot Marker",
+               "165d": "Eval Boot Marker"}
+for tid, summary in BOOT_MARKER.items():
+    assert tasks[tid]["summary"] == summary, (tid, tasks[tid]["summary"])
+    del tasks[tid]
+    trans.pop(tid, None)
+for outs in trans.values():
+    for tid in BOOT_MARKER:
+        outs.pop(tid, None)
+
+install, ev_install = tasks["d584"], tasks["aaf2"]
+assert (install["summary"], ev_install["summary"]) == ("Reload", "Eval Reload")
+install["summary"] = "Install"
+install["description"] = "Installs the staged image with install all; the switch reloads itself"
+install["variables"]["incoming"]["template"] = f"@{NXOS_ID}: Install"
+# IOS writes every RunCommandTemplate result to job.preCheckOutput, so the Show Version
+# retries would overwrite the install output. Keep it where a failed upgrade can be read.
+assert install["variables"]["outgoing"] == {"mop_template_results": "$var.job.preCheckOutput"}
+install["variables"]["outgoing"] = {"mop_template_results": "$var.job.installOutput"}
+# a workflow uuid of its own, so it cannot collide with IOS Upgrade on one Platform
+upg["uuid"] = duuid("workflow-uuid:NX-OS Upgrade")
+ev_install["summary"] = "Eval Install"
+
+EDGE = {"type": "standard"}
+# Fail the build if upstream IOS reshapes these edges, rather than silently discard the change.
+assert {k: trans[k] for k in ("a1ef", "0e8e", "d584", "aaf2")} == {
+    "a1ef": {}, "0e8e": {}, "d584": {"aaf2": dict(EDGE, state="success")},
+    "aaf2": {"0e8c": dict(EDGE, state="success")}}, "IOS Upgrade edges changed upstream"
+trans["a1ef"] = {"bdec": dict(EDGE, state="success")}
+trans["0e8e"] = {"d584": dict(EDGE, state="success")}
+# The switch reloads at the end of `install all`, which can drop the session before the
+# command returns. Either way the device is rebooting, so both an errored Install and an
+# unexpected output go to the same Reattempt loop IOS uses after its reload: Show Version
+# is what proves the new image, and exhausted attempts end in the failure response.
+trans["d584"] = {"aaf2": dict(EDGE, state="success"), "5518": dict(EDGE, state="error")}
+trans["aaf2"] = {"0e8c": dict(EDGE, state="success"), "5518": dict(EDGE, state="failure")}
+
+# close the vertical gaps the removed tasks leave on the canvas
+LAYOUT = {"a1ef": (0, -564), "bdec": (0, -456), "d946": (0, -348), "fe4a": (0, -240),
+          "0e8e": (0, -132), "d584": (0, -24), "aaf2": (0, 84), "0e8c": (0, 192),
+          "5518": (-324, 228), "b9a9": (0, 300), "b241": (0, 408), "81ea": (0, 516),
+          "83a4": (-324, 624), "f654": (0, 624), "workflow_end": (0, 732)}
+for tid, (x, y) in LAYOUT.items():
+    tasks[tid]["nodeLocation"] = {"x": x, "y": y}
 
 with open(os.path.join(HERE, "ported_adapted.json"), "w") as f:
     json.dump(ported, f, indent=1)

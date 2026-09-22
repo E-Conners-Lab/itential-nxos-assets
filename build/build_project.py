@@ -4,7 +4,7 @@
 Starts from the upstream NX-OS project (preserving its _id so existing
 internal "@<projectId>: <name>" references stay valid) and ports the
 folders IOS has but NX-OS lacks: Golden Configuration, Inventory
-Management, Port Turn Up -- plus a new NX-OS Upgrade Form.
+Management, Port Turn Up -- plus IOS Upgrade as the base of the NX-OS upgrade.
 """
 import json, copy, os, hashlib
 
@@ -77,6 +77,12 @@ ported.append(port("jsonForm", "Compliance Form", "/Golden Configuration"))
 inv = port("workflow", "Create & Update Inventory from NetBox", "/Inventory Management")
 clr = port("workflow", "Clear & Delete Inventory", "/Inventory Management")
 ported += [inv, clr]
+
+# ---- Software Upgrade ----
+# The upstream NX-OS upgrade drives five child jobs through Command Template Runner and a
+# JST. IOS Upgrade is one flat workflow of MOP tasks and evaluations, so it is the base;
+# adapt.py swaps its IOS boot-marker + reload tasks for NX-OS's single `install all`.
+ported.append(port("workflow", "IOS Upgrade", "/Software Upgrade", new_name="NX-OS Upgrade"))
 
 # ---- Port Turn Up ----
 ported.append(port("workflow", "Port Turn Up", "/Port Turn Up"))

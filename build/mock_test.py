@@ -6,9 +6,9 @@ is read out of the shipped project JSON and exercised against canned NX-OS outpu
 (`fixtures/`, provenance in fixtures/PROVENANCE.md) or a canned API response.
 
 Covers what this contribution adds: Port Turn Up (pre/post checks, config
-template, inventory object), the NetBox inventory payload, and Run Compliance
-(tree lookup code, HTML report). The Software Upgrade path is upstream's,
-unchanged, and is not re-tested here.
+template, inventory object), the NetBox inventory payload, Run Compliance
+(tree lookup code, HTML report) and NX-OS Upgrade (its checks and form). The
+install itself reloads the switch, so its output is not modelled here.
 
 MOP semantics modelled (from the Itential MOP docs, not observed on a Platform):
   - `<!var!>` in a command or rule is replaced by that template variable
@@ -253,6 +253,59 @@ for name in ("Simple", "Jinja2", "Lab"):
 for text in ("no password strength-check", "copp profile strict", "vrf context management",
              "feature interface-vlan"):
     check(f"real running-config renders {text!r} exactly as the trees do", text in real_lines)
+
+# ------------------------------------------------------------ 6. NX-OS Upgrade
+# The switch in the real captures runs 10.4(2) from bootflash:///nxos64-cs.10.4.2.F.bin.
+upg = WF["NX-OS Upgrade"]
+upg_keys = {d["key"] for d in upg["tasks"]["a1ef"]["variables"]["incoming"]["data_to_merge"]}
+for name in ("File Verification", "Install", "Show Version", "Pre and Post Checks"):
+    t = C[("mopCommandTemplate", name)]
+    used = {v for cmd in t["commands"] for v in re.findall(r"<!(\w+)!>", json.dumps(cmd))}
+    check(f"{name} only uses variables NX-OS Upgrade supplies", used <= upg_keys,
+          f"missing: {sorted(used - upg_keys)}")
+
+form = C[("jsonForm", "Upgrade Form")]
+check("Upgrade Form submits exactly the inputs NX-OS Upgrade reads",
+      set(form["schema"]["properties"]) == upg_keys == set(upg["inputSchema"]["required"]) - {"_id"},
+      (sorted(form["schema"]["properties"]), sorted(upg_keys)))
+
+fv = C[("mopCommandTemplate", "File Verification")]
+show_ver = fixture("real_show_version.txt")
+STAGED = "bootflash:///nxos64-cs.10.4.2.F.bin"
+
+
+def fv_outputs(image_path, dir_fixture):
+    return {"show version": show_ver, f"dir {image_path}": fixture(dir_fixture),
+            "show running | include boot": "boot nxos bootflash:/nxos64-cs.10.4.2.F.bin", "dir": "listing"}
+
+
+# The captures come from one switch: the staged-image listing is of the image it runs, so it
+# stands in for "a newer image is staged" -- only the dir output's shape matters here.
+check("File Verification passes: newer target, image staged",
+      template_passes(fv, fv_outputs(STAGED, "real_dir_image_present.txt"),
+                      {"version": "10.5(3)", "image_path": STAGED}))
+check("File Verification stops when the image is not staged",
+      not template_passes(fv, fv_outputs("bootflash:///nxos64-cs.10.5.3.F.bin", "real_dir_image_missing.txt"),
+                          {"version": "10.5(3)", "image_path": "bootflash:///nxos64-cs.10.5.3.F.bin"}))
+check("File Verification stops when the switch already runs the target",
+      not template_passes(fv, fv_outputs(STAGED, "real_dir_image_present.txt"),
+                          {"version": "10.4(2)", "image_path": STAGED}))
+
+check("File Verification stops on any other dir error (no file listing came back)",
+      not template_passes(fv, dict(fv_outputs(STAGED, "real_dir_image_present.txt"),
+                                   **{f"dir {STAGED}": fixture("error_invalid_command.txt")}),
+                          {"version": "10.5(3)", "image_path": STAGED}))
+
+sv = C[("mopCommandTemplate", "Show Version")]
+check("Show Version passes once the switch runs the target version",
+      template_passes(sv, {"show version": show_ver}, {"version": "10.4(2)"}))
+check("Show Version fails while the old version still runs (the reattempt loop continues)",
+      not template_passes(sv, {"show version": show_ver}, {"version": "10.5(3)"}))
+
+inst = C[("mopCommandTemplate", "Install")]
+check("Install runs install all non-interruptively on the chosen image",
+      [substitute(c["command"], {"image_path": STAGED}) for c in inst["commands"]]
+      == [f"install all nxos {STAGED} non-interruptive"])
 
 # ------------------------------------------------------------------ report
 width = max(len(n) for n, _, _ in results)

@@ -3,12 +3,16 @@
 to separate inherited conditions from ones introduced by the conversion."""
 import json, sys
 
+# IOS Upgrade ships here as NX-OS Upgrade; compare it under its new name.
+RENAMED = {"IOS Upgrade": "NX-OS Upgrade"}
+
+
 def scan(path, label):
     p = json.load(open(path))
     out = []
     for c in p["components"]:
         doc = c["document"] or {}
-        wf, trans = doc.get("name"), doc.get("transitions") or {}
+        wf, trans = RENAMED.get(doc.get("name"), doc.get("name")), doc.get("transitions") or {}
         for tid, t in (doc.get("tasks") or {}).items():
             if t.get("name") != "evaluation":
                 continue

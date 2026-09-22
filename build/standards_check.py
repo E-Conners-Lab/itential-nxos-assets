@@ -9,12 +9,17 @@ p = json.load(open(OUT))
 
 fails, notes = [], []
 
+# IOS Upgrade ships here as NX-OS Upgrade; compare it under its new name.
+RENAMED = {"IOS Upgrade": "NX-OS Upgrade"}
+
+
 def single_branch_evals(path):
     """Evaluation tasks lacking both a success and a failure transition."""
     d = json.load(open(path))
     found = set()
     for c in d["components"]:
         doc = c["document"] or {}
+        doc = dict(doc, name=RENAMED.get(doc.get("name"), doc.get("name")))
         tr = doc.get("transitions") or {}
         for tid, t in (doc.get("tasks") or {}).items():
             if t.get("name") != "evaluation":

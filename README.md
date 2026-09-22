@@ -2,8 +2,8 @@
 
 A proposed contribution to [`itential/assets`](https://github.com/itential/assets): the Cisco NX-OS
 product brought up to the shape of Cisco IOS, with software upgrade, port turn-up, golden
-configuration compliance, inventory management and a command template runner, on Itential
-Gateway 5.
+configuration compliance and inventory management, on Itential Gateway 5. Like Cisco IOS, it
+uses no child jobs and no JSTs.
 
 This repo stages it for review before the upstream PR is opened. **[`PR-DESCRIPTION.md`](./PR-DESCRIPTION.md)**
 is the reviewer-facing summary: what changed, why, the defects fixed, known issues and test results.
@@ -29,12 +29,12 @@ All six should print `PASS`:
 
 | Check | Proves |
 |---|---|
-| `verify` | Project structure: every reference resolves, including transformation IDs; forms are importable; NetBox task parameters match the model's declared types |
+| `verify` | Project structure: every reference resolves; the four Cisco IOS folders, with no child jobs or JSTs; forms are importable; NetBox task parameters match the model's declared types |
 | `standards_check` | The mechanical rules in upstream's `AGENTS.md` |
 | `baseline_check` | No structural defect was **introduced**; the ones present are inherited from the upstream projects |
 | `gc_verify` | The golden config trees match the Cisco IOS tree format, with device type `cisco-nx` |
 | `readme_check` | README structure and Table of Contents anchors, per upstream's `STANDARDS.md` |
-| `mock_test` | 42 device-facing behaviours against NX-OS output, most of it captured from a real switch |
+| `mock_test` | 54 device-facing behaviours against NX-OS output, most of it captured from a real switch |
 
 The build is deterministic, so you can confirm the committed files are exactly what the build
 produces:
@@ -48,7 +48,7 @@ produces:
 Import into an Itential Platform (tested on 6.5.2):
 
 1. **Studio → Projects → Import** `Cisco/NX-OS/Studio Projects/Cisco NX-OS.project.json`, then
-   check the project has **19 components**. The importer can drop a component without an error.
+   check the project has **15 components**. The importer can drop a component without an error.
 2. **Configuration Manager → 🔍 → Golden Configurations → Import** each file in
    `Cisco/NX-OS/Golden Configurations/`.
 
@@ -60,14 +60,13 @@ project's components or an existing tree's lines, and it reports no error.
 
 ## Test It on a Real Nexus
 
-See [`devnet/README.md`](./devnet/README.md). Every workflow except Software Upgrade was run that
-way on 2026-09-21; the results are in `PR-DESCRIPTION.md`.
+See [`devnet/README.md`](./devnet/README.md). Every workflow except NX-OS Upgrade was run that
+way on 2026-09-21 and 2026-09-22; the results are in `PR-DESCRIPTION.md`.
 
 ## Open Before Submitting Upstream
 
 - **Confirm 6.5.2 is still the current GA release** of Itential Platform (upstream checklist).
-- **Software Upgrade can't be started from its Upgrade Form as shipped.** It's a known issue,
-  explained in `PR-DESCRIPTION.md`; a fix changes upstream logic and needs a decision first.
+- **Re-import the 15-component build** on a Platform and confirm 15 of 15 components.
 
 ## Submitting Upstream
 

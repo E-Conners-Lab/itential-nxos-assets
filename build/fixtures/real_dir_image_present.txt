@@ -1,0 +1,6 @@
+ 2708622336    Dec 14 08:57:24 2023  nxos64-cs.10.4.2.F.bin
+
+Usage for bootflash://sup-local
+ 2724270080 bytes used
+ 1739329536 bytes free
+ 4463599616 bytes total

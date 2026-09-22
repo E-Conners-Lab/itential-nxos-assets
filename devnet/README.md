@@ -107,7 +107,7 @@ VPN or the tunnel is down.
 |---|---|---|
 | Run Compliance | `tree_name` each of the three trees, `version: initial` | Complete. An unconfigured sandbox switch scores low, and every remaining finding is a real gap. None of `username`, `version`, `ssh login-attempts` is flagged |
 | Port Turn Up | a spare, unconfigured port, e.g. `Ethernet1/20`, sub-interface `100`, a documentation address | Complete; the switch shows the parent routed and admin-up and the sub-interface configured. With no cable it reports `down (Parent interface down)` |
-| Command Template Runner | `templateName` `@66d0d1ba21161b4df27174c2: Post-Checks`, the same interface; **pass both suppress flags as `false`** | Complete; the output shows the sub-interface state |
+| NX-OS Upgrade | not run on the sandbox: it needs a second NX-OS image staged in `bootflash:`, and `install all` reloads the switch | With an image staged, Complete; `show version` reports the target version |
 | Create & Update Inventory from NetBox | an inventory name that doesn't exist yet | Complete; the lookup errors (by design), the inventory is created and populated |
 | Clear & Delete Inventory | that same inventory | Complete; the inventory is gone |
 

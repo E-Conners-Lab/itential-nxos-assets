@@ -1,2174 +1,15 @@
 {
   "_id": "66d0d1ba21161b4df27174c2",
   "name": "Cisco NX-OS",
-  "description": "Cisco NX-OS project with assets for software upgrade, port turn up, golden configuration compliance, inventory management, and a command template runner.",
+  "description": "Cisco NX-OS project with assets for software upgrade, port turn up, golden configuration compliance, and inventory management.",
   "components": [
-    {
-      "iid": 0,
-      "reference": "990ce0e2-d35e-4bed-9f3a-fb65e75f9220",
-      "type": "workflow",
-      "folder": "/Software Upgrade",
-      "document": {
-        "name": "Perform Device Connection",
-        "tasks": {
-          "workflow_start": {
-            "name": "workflow_start",
-            "groups": [],
-            "nodeLocation": {
-              "x": -348,
-              "y": -396
-            }
-          },
-          "workflow_end": {
-            "name": "workflow_end",
-            "groups": [],
-            "nodeLocation": {
-              "x": -348,
-              "y": 24
-            }
-          },
-          "b412": {
-            "name": "isAlive",
-            "canvasName": "isAlive",
-            "summary": "Test Device Connection",
-            "description": "Test Device Connection",
-            "location": "Application",
-            "locationType": null,
-            "app": "ConfigurationManager",
-            "type": "automatic",
-            "displayName": "ConfigurationManager",
-            "variables": {
-              "incoming": {
-                "name": "$var.job.deviceName"
-              },
-              "outgoing": {
-                "status": ""
-              }
-            },
-            "actor": "Pronghorn",
-            "groups": [],
-            "nodeLocation": {
-              "x": -348,
-              "y": -192
-            }
-          },
-          "f065": {
-            "name": "reattempt",
-            "canvasName": "reattempt",
-            "summary": "Retry Device Connection Test",
-            "description": "Reattempt to test device connection after waiting the specified number of minutes",
-            "location": "Application",
-            "locationType": null,
-            "app": "MOP",
-            "type": "automatic",
-            "displayName": "MOP",
-            "variables": {
-              "incoming": {
-                "job_id": "$var.job._id",
-                "attemptID": "retry_test_connection",
-                "minutes": 2,
-                "attempts": 12
-              },
-              "outgoing": {
-                "response": ""
-              }
-            },
-            "actor": "Pronghorn",
-            "groups": [],
-            "nodeLocation": {
-              "x": 24,
-              "y": -120
-            }
-          },
-          "7d17": {
-            "name": "evaluation",
-            "canvasName": "evaluation",
-            "summary": "Check If Device Is Alive",
-            "description": "Check If Device Is Alive",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "all_true_flag": false,
-                "evaluation_groups": [
-                  {
-                    "all_true_flag": false,
-                    "evaluations": [
-                      {
-                        "operand_1": {
-                          "task": "b412",
-                          "variable": "status"
-                        },
-                        "operand_2": {
-                          "task": "static",
-                          "variable": true
-                        },
-                        "operator": "==",
-                        "query": "response",
-                        "rightQuery": ""
-                      },
-                      {
-                        "operand_1": {
-                          "task": "b412",
-                          "variable": "status"
-                        },
-                        "operand_2": {
-                          "task": "static",
-                          "variable": true
-                        },
-                        "operator": "contains",
-                        "query": "",
-                        "rightQuery": ""
-                      }
-                    ]
-                  }
-                ]
-              },
-              "outgoing": {
-                "return_value": ""
-              }
-            },
-            "actor": "Pronghorn",
-            "groups": [],
-            "nodeLocation": {
-              "x": -348,
-              "y": -84
-            }
-          },
-          "f629": {
-            "name": "delay",
-            "canvasName": "delay",
-            "summary": "Delay Device Connection Test",
-            "description": "Delay device connection testing for a duration by Job ID and number of seconds.",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "time": 400
-              },
-              "outgoing": {
-                "time_in_milliseconds": ""
-              }
-            },
-            "actor": "Pronghorn",
-            "groups": [],
-            "nodeLocation": {
-              "x": -348,
-              "y": -288
-            }
-          }
-        },
-        "transitions": {
-          "workflow_start": {
-            "f629": {
-              "state": "success",
-              "type": "standard"
-            }
-          },
-          "workflow_end": {},
-          "b412": {
-            "f065": {
-              "type": "standard",
-              "state": "error"
-            },
-            "7d17": {
-              "state": "success",
-              "type": "standard"
-            }
-          },
-          "f065": {
-            "b412": {
-              "state": "success",
-              "type": "revert"
-            }
-          },
-          "7d17": {
-            "workflow_end": {
-              "state": "success",
-              "type": "standard"
-            },
-            "f065": {
-              "type": "standard",
-              "state": "failure"
-            }
-          },
-          "f629": {
-            "b412": {
-              "state": "success",
-              "type": "standard"
-            }
-          }
-        },
-        "inputSchema": {
-          "type": "object",
-          "properties": {
-            "deviceName": {
-              "title": "name",
-              "type": "string",
-              "examples": ["xr9kv-atl"]
-            },
-            "_id": {
-              "title": "job_id",
-              "type": "string",
-              "examples": ["test"]
-            }
-          },
-          "required": ["deviceName", "_id"]
-        },
-        "outputSchema": {
-          "type": "object",
-          "properties": {
-            "deviceName": {
-              "title": "name",
-              "type": "string",
-              "examples": ["xr9kv-atl"]
-            },
-            "_id": {
-              "type": "string",
-              "pattern": "^[0-9a-f]{24}$"
-            },
-            "initiator": {
-              "type": "string"
-            }
-          }
-        },
-        "type": "automation",
-        "font_size": 12,
-        "errorHandler": null,
-        "preAutomationTime": 0,
-        "sla": 0,
-        "last_updated": "2025-01-24T10:51:28.191Z",
-        "lastUpdatedVersion": "5.55.2-2023.2.13",
-        "created": "2024-02-02T21:37:24.636Z",
-        "created_by": {
-          "provenance": "local_aaa",
-          "username": "admin@pronghorn",
-          "firstname": "admin",
-          "inactive": false
-        },
-        "createdVersion": "5.46.0-2023.1.19.0",
-        "last_updated_by": {
-          "provenance": "Okta",
-          "username": "admin@itential",
-          "firstname": "admin@itential",
-          "inactive": false,
-          "sso": true,
-          "nameID": "admin@itential"
-        },
-        "canvasVersion": 3,
-        "tags": [],
-        "groups": [],
-        "migrationVersion": 3
-      }
-    },
-    {
-      "iid": 1,
-      "reference": "ad31694c-37ba-4bcc-81e2-fd3ebebf6fa5",
-      "type": "workflow",
-      "folder": "/Command Template Runner",
-      "document": {
-        "name": "Command Template Runner",
-        "tasks": {
-          "525": {
-            "name": "evaluation",
-            "canvasName": "evaluation",
-            "summary": "Check If Template Passed and If Suppressing Success Message",
-            "description": "Check if template passed and if suppressing success message",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "all_true_flag": false,
-                "evaluation_groups": [
-                  {
-                    "all_true_flag": true,
-                    "evaluations": [
-                      {
-                        "query": "",
-                        "operand_1": {
-                          "variable": "suppressSuccessMessage",
-                          "task": "job",
-                          "editable": true
-                        },
-                        "operator": "==",
-                        "operand_2": {
-                          "variable": false,
-                          "task": "static"
-                        }
-                      },
-                      {
-                        "query": "result",
-                        "operand_1": {
-                          "variable": "mop_template_results",
-                          "task": "8ce4"
-                        },
-                        "operator": "==",
-                        "operand_2": {
-                          "variable": true,
-                          "task": "static"
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              "outgoing": {
-                "return_value": null
-              }
-            },
-            "groups": [],
-            "nodeLocation": {
-              "x": 780,
-              "y": 708
-            }
-          },
-          "workflow_start": {
-            "name": "workflow_start",
-            "groups": [],
-            "nodeLocation": {
-              "x": 168,
-              "y": 132
-            }
-          },
-          "workflow_end": {
-            "name": "workflow_end",
-            "groups": [],
-            "nodeLocation": {
-              "x": 144,
-              "y": 1200
-            }
-          },
-          "8ce4": {
-            "name": "RunCommandTemplate",
-            "canvasName": "RunCommandTemplate",
-            "summary": "Run a Command Template against a device",
-            "description": "Run a Command Template against a device",
-            "location": "Application",
-            "locationType": null,
-            "app": "MOP",
-            "type": "automatic",
-            "displayName": "MOP",
-            "variables": {
-              "incoming": {
-                "template": "$var.job.templateName",
-                "variables": "$var.job.templateVariables",
-                "devices": "$var.927c.pushedArray"
-              },
-              "outgoing": {
-                "mop_template_results": "$var.job.templateResults"
-              },
-              "error": "$var.job.templateError",
-              "decorators": []
-            },
-            "groups": [],
-            "actor": "Pronghorn",
-            "scheduled": false,
-            "nodeLocation": {
-              "x": 168,
-              "y": 396
-            }
-          },
-          "81d8": {
-            "name": "viewTemplateResults",
-            "canvasName": "viewTemplateResults",
-            "summary": "View Command Template Results",
-            "description": "View the results of the command template",
-            "location": "Application",
-            "app": "MOP",
-            "displayName": "MOP",
-            "type": "manual",
-            "variables": {
-              "incoming": {
-                "mop_template_results": "$var.8ce4.mop_template_results"
-              },
-              "outgoing": {},
-              "error": "",
-              "decorators": []
-            },
-            "view": "/mop/task/viewTemplateResults",
-            "groups": [],
-            "scheduled": false,
-            "nodeLocation": {
-              "x": 792,
-              "y": 936
-            }
-          },
-          "f1a7": {
-            "name": "ViewData",
-            "canvasName": "ViewData",
-            "summary": "Template Error",
-            "description": "Show the template failure message and decision options",
-            "location": "Application",
-            "app": "WorkFlowEngine",
-            "displayName": "Tools",
-            "type": "manual",
-            "variables": {
-              "incoming": {
-                "header": "Template Errored",
-                "message": "$var.a7f3.errorMessage",
-                "body": "$var.8ce4.error",
-                "variables": {},
-                "btn_success": "Retry",
-                "btn_failure": "Continue"
-              },
-              "outgoing": {},
-              "error": "",
-              "decorators": []
-            },
-            "view": "/workflow_engine/task/ViewData",
-            "groups": [],
-            "scheduled": false,
-            "nodeLocation": {
-              "x": -900,
-              "y": 972
-            }
-          },
-          "543a": {
-            "name": "evaluation",
-            "canvasName": "evaluation",
-            "summary": "Check If Template Errored and If Reattempting",
-            "description": "Check if template errored and if reattempting template",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "all_true_flag": false,
-                "evaluation_groups": [
-                  {
-                    "all_true_flag": false,
-                    "evaluations": [
-                      {
-                        "query": "",
-                        "operand_1": {
-                          "variable": "reattempt",
-                          "task": "job",
-                          "editable": true
-                        },
-                        "operator": "==",
-                        "operand_2": {
-                          "variable": true,
-                          "task": "static"
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              "outgoing": {
-                "return_value": null
-              }
-            },
-            "groups": [],
-            "nodeLocation": {
-              "x": -216,
-              "y": 408
-            }
-          },
-          "849c": {
-            "name": "reattempt",
-            "canvasName": "reattempt",
-            "summary": "Reattempt Template",
-            "description": "Reattempt the template after waiting the specified number of minutes",
-            "location": "Application",
-            "locationType": null,
-            "app": "MOP",
-            "type": "automatic",
-            "displayName": "MOP",
-            "variables": {
-              "incoming": {
-                "job_id": "$var.job._id",
-                "attemptID": "connection",
-                "minutes": "$var.job.reattemptWaitTime",
-                "attempts": "$var.job.reattemptQuantity"
-              },
-              "outgoing": {
-                "response": null
-              },
-              "error": "",
-              "decorators": []
-            },
-            "groups": [],
-            "actor": "Pronghorn",
-            "scheduled": false,
-            "nodeLocation": {
-              "x": 180,
-              "y": 744
-            }
-          },
-          "f884": {
-            "name": "evaluation",
-            "canvasName": "evaluation",
-            "summary": "Check If Template Failed and If Reattempting",
-            "description": "Check if template failed and if reattempting template",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "all_true_flag": false,
-                "evaluation_groups": [
-                  {
-                    "all_true_flag": true,
-                    "evaluations": [
-                      {
-                        "query": "result",
-                        "operand_1": {
-                          "variable": "mop_template_results",
-                          "task": "8ce4"
-                        },
-                        "operator": "==",
-                        "operand_2": {
-                          "variable": false,
-                          "task": "static"
-                        }
-                      },
-                      {
-                        "query": "",
-                        "operand_1": {
-                          "variable": "reattempt",
-                          "task": "job",
-                          "editable": true
-                        },
-                        "operator": "==",
-                        "operand_2": {
-                          "variable": true,
-                          "task": "static"
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              "outgoing": {
-                "return_value": null
-              }
-            },
-            "groups": [],
-            "nodeLocation": {
-              "x": 180,
-              "y": 612
-            }
-          },
-          "b1a0": {
-            "name": "evaluation",
-            "canvasName": "evaluation",
-            "summary": "Check If Template Passed and If Suppressing Success Message",
-            "description": "Check if template passed and if suppressing success message",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "all_true_flag": false,
-                "evaluation_groups": [
-                  {
-                    "all_true_flag": true,
-                    "evaluations": [
-                      {
-                        "query": "",
-                        "operand_1": {
-                          "variable": "suppressSuccessMessage",
-                          "task": "job",
-                          "editable": true
-                        },
-                        "operator": "==",
-                        "operand_2": {
-                          "variable": true,
-                          "task": "static"
-                        }
-                      },
-                      {
-                        "query": "result",
-                        "operand_1": {
-                          "variable": "mop_template_results",
-                          "task": "8ce4"
-                        },
-                        "operator": "==",
-                        "operand_2": {
-                          "variable": true,
-                          "task": "static"
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              "outgoing": {
-                "return_value": null
-              }
-            },
-            "groups": [],
-            "nodeLocation": {
-              "x": 708,
-              "y": 564
-            }
-          },
-          "927c": {
-            "name": "arrayPush",
-            "canvasName": "push",
-            "summary": "Build Device Array",
-            "description": "Put the device name into an array as required by the \"RunCommandTemplate\" task",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "automatic",
-            "displayName": "Array",
-            "variables": {
-              "incoming": {
-                "arr": [],
-                "elementN": "$var.job.deviceName"
-              },
-              "outgoing": {
-                "pushedArray": null
-              },
-              "error": "",
-              "decorators": []
-            },
-            "groups": [],
-            "actor": "Pronghorn",
-            "scheduled": false,
-            "nodeLocation": {
-              "x": 168,
-              "y": 252
-            }
-          },
-          "fe84": {
-            "name": "evaluation",
-            "canvasName": "evaluation",
-            "summary": "Check If Suppressing Failure Message",
-            "description": "Check if suppressing failure message",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "all_true_flag": false,
-                "evaluation_groups": [
-                  {
-                    "all_true_flag": true,
-                    "evaluations": [
-                      {
-                        "operand_1": {
-                          "task": "job",
-                          "variable": "suppressFailureMessage"
-                        },
-                        "operand_2": {
-                          "task": "static",
-                          "variable": true
-                        },
-                        "operator": "==",
-                        "query": "",
-                        "rightQuery": ""
-                      }
-                    ]
-                  }
-                ]
-              },
-              "outgoing": {
-                "return_value": null
-              }
-            },
-            "groups": [],
-            "nodeLocation": {
-              "x": 264,
-              "y": 948
-            }
-          },
-          "6bd2": {
-            "name": "evaluation",
-            "canvasName": "evaluation",
-            "summary": "Check If Template Failed and If Not Reattempting",
-            "description": "Check if template failed and if not reattempting template",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "all_true_flag": false,
-                "evaluation_groups": [
-                  {
-                    "all_true_flag": true,
-                    "evaluations": [
-                      {
-                        "query": "result",
-                        "operand_1": {
-                          "variable": "mop_template_results",
-                          "task": "8ce4"
-                        },
-                        "operator": "==",
-                        "operand_2": {
-                          "variable": false,
-                          "task": "static"
-                        }
-                      },
-                      {
-                        "query": "",
-                        "operand_1": {
-                          "variable": "reattempt",
-                          "task": "job",
-                          "editable": true
-                        },
-                        "operator": "==",
-                        "operand_2": {
-                          "variable": false,
-                          "task": "static"
-                        }
-                      }
-                    ]
-                  }
-                ]
-              },
-              "outgoing": {
-                "return_value": null
-              }
-            },
-            "groups": [],
-            "nodeLocation": {
-              "x": 576,
-              "y": 396
-            }
-          },
-          "9c18": {
-            "name": "evaluation",
-            "canvasName": "evaluation",
-            "summary": "Check If Suppressing Failure Message",
-            "description": "Check if suppressing failure message",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "all_true_flag": false,
-                "evaluation_groups": [
-                  {
-                    "all_true_flag": true,
-                    "evaluations": [
-                      {
-                        "operand_1": {
-                          "task": "job",
-                          "variable": "suppressFailureMessage"
-                        },
-                        "operand_2": {
-                          "task": "static",
-                          "variable": true
-                        },
-                        "operator": "==",
-                        "query": "",
-                        "rightQuery": ""
-                      }
-                    ]
-                  }
-                ]
-              },
-              "outgoing": {
-                "return_value": null
-              }
-            },
-            "groups": [],
-            "nodeLocation": {
-              "x": -576,
-              "y": 408
-            }
-          },
-          "955f": {
-            "name": "evaluation",
-            "canvasName": "evaluation",
-            "summary": "Check If Suppressing Failure Message",
-            "description": "Check if suppressing failure message",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "all_true_flag": false,
-                "evaluation_groups": [
-                  {
-                    "all_true_flag": true,
-                    "evaluations": [
-                      {
-                        "operand_1": {
-                          "task": "job",
-                          "variable": "suppressFailureMessage"
-                        },
-                        "operand_2": {
-                          "task": "static",
-                          "variable": true
-                        },
-                        "operator": "==",
-                        "query": "",
-                        "rightQuery": ""
-                      }
-                    ]
-                  }
-                ]
-              },
-              "outgoing": {
-                "return_value": null
-              }
-            },
-            "groups": [],
-            "nodeLocation": {
-              "x": -180,
-              "y": 744
-            }
-          },
-          "f36c": {
-            "name": "viewTemplateResults",
-            "canvasName": "viewTemplateResults",
-            "summary": "View Command Template Results",
-            "description": "View the results of the command template",
-            "location": "Application",
-            "app": "MOP",
-            "displayName": "MOP",
-            "type": "manual",
-            "variables": {
-              "incoming": {
-                "mop_template_results": "$var.8ce4.mop_template_results"
-              },
-              "outgoing": {},
-              "error": "",
-              "decorators": []
-            },
-            "view": "/mop/task/viewTemplateResults",
-            "groups": [],
-            "scheduled": false,
-            "nodeLocation": {
-              "x": -576,
-              "y": 924
-            }
-          },
-          "a7f3": {
-            "name": "transformation",
-            "canvasName": "transformation",
-            "summary": "Create Command Template Runner Error Message",
-            "description": "Create Command Template Runner error message",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "tr_id": "66d0d175cddf0c8da2752c79",
-                "variableMap": {
-                  "templateName": "$var.job.templateName"
-                },
-                "options": {
-                  "extractOutput": true,
-                  "validateIncoming": true,
-                  "revertToDefaultValue": true
-                }
-              },
-              "outgoing": {
-                "errorMessage": null
-              },
-              "decorators": []
-            },
-            "actor": "Pronghorn",
-            "groups": [],
-            "nodeLocation": {
-              "x": -912,
-              "y": 420
-            }
-          },
-          "580e": {
-            "name": "evaluation",
-            "canvasName": "evaluation",
-            "summary": "Check if Template Errored",
-            "description": "Check if template errored",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "all_true_flag": false,
-                "evaluation_groups": [
-                  {
-                    "all_true_flag": false,
-                    "evaluations": [
-                      {
-                        "operand_1": {
-                          "task": "8ce4",
-                          "variable": "error"
-                        },
-                        "operand_2": {
-                          "task": "static",
-                          "variable": null
-                        },
-                        "operator": "!=",
-                        "query": "",
-                        "rightQuery": ""
-                      }
-                    ]
-                  }
-                ]
-              },
-              "outgoing": {
-                "return_value": ""
-              }
-            },
-            "actor": "Pronghorn",
-            "groups": [],
-            "nodeLocation": {
-              "x": -576,
-              "y": 744
-            }
-          }
-        },
-        "transitions": {
-          "525": {
-            "81d8": {
-              "type": "standard",
-              "state": "success"
-            }
-          },
-          "workflow_start": {
-            "927c": {
-              "type": "standard",
-              "state": "success"
-            }
-          },
-          "workflow_end": {},
-          "8ce4": {
-            "525": {
-              "type": "standard",
-              "state": "success"
-            },
-            "543a": {
-              "type": "standard",
-              "state": "error"
-            },
-            "f884": {
-              "type": "standard",
-              "state": "success"
-            },
-            "b1a0": {
-              "type": "standard",
-              "state": "success"
-            },
-            "6bd2": {
-              "type": "standard",
-              "state": "success"
-            }
-          },
-          "81d8": {
-            "8ce4": {
-              "type": "revert",
-              "state": "failure"
-            },
-            "workflow_end": {
-              "state": "success",
-              "type": "standard"
-            }
-          },
-          "f1a7": {
-            "workflow_end": {
-              "type": "standard",
-              "state": "failure"
-            },
-            "8ce4": {
-              "type": "revert",
-              "state": "success"
-            }
-          },
-          "543a": {
-            "849c": {
-              "type": "standard",
-              "state": "success"
-            },
-            "9c18": {
-              "type": "standard",
-              "state": "failure"
-            }
-          },
-          "849c": {
-            "8ce4": {
-              "type": "revert",
-              "state": "success"
-            },
-            "955f": {
-              "state": "error",
-              "type": "standard"
-            }
-          },
-          "f884": {
-            "849c": {
-              "type": "standard",
-              "state": "success"
-            }
-          },
-          "b1a0": {
-            "workflow_end": {
-              "type": "standard",
-              "state": "success"
-            }
-          },
-          "927c": {
-            "8ce4": {
-              "type": "standard",
-              "state": "success"
-            }
-          },
-          "fe84": {
-            "workflow_end": {
-              "state": "success",
-              "type": "standard"
-            },
-            "81d8": {
-              "type": "standard",
-              "state": "failure"
-            }
-          },
-          "6bd2": {
-            "fe84": {
-              "state": "success",
-              "type": "standard"
-            }
-          },
-          "9c18": {
-            "workflow_end": {
-              "state": "success",
-              "type": "standard"
-            },
-            "a7f3": {
-              "type": "standard",
-              "state": "failure"
-            }
-          },
-          "955f": {
-            "workflow_end": {
-              "state": "success",
-              "type": "standard"
-            },
-            "580e": {
-              "state": "failure",
-              "type": "standard"
-            }
-          },
-          "f36c": {
-            "8ce4": {
-              "type": "revert",
-              "state": "failure"
-            },
-            "workflow_end": {
-              "state": "success",
-              "type": "standard"
-            }
-          },
-          "a7f3": {
-            "f1a7": {
-              "state": "success",
-              "type": "standard"
-            }
-          },
-          "580e": {
-            "f36c": {
-              "state": "failure",
-              "type": "standard"
-            },
-            "a7f3": {
-              "state": "success",
-              "type": "standard"
-            }
-          }
-        },
-        "inputSchema": {
-          "type": "object",
-          "properties": {
-            "suppressSuccessMessage": {
-              "type": ["array", "boolean", "null", "number", "object", "string"]
-            },
-            "templateName": {
-              "title": "template",
-              "type": "string",
-              "examples": ["show version"]
-            },
-            "templateVariables": {
-              "type": "object",
-              "properties": {},
-              "examples": [
-                {
-                  "device_name": "my-device1"
-                }
-              ]
-            },
-            "reattempt": {
-              "type": ["array", "boolean", "null", "number", "object", "string"]
-            },
-            "_id": {
-              "title": "job_id",
-              "type": "string",
-              "examples": ["test"]
-            },
-            "reattemptWaitTime": {
-              "title": "minutes",
-              "type": "integer",
-              "examples": [1]
-            },
-            "reattemptQuantity": {
-              "title": "attempts",
-              "type": "integer",
-              "examples": [2]
-            },
-            "deviceName": {
-              "type": ["array", "string", "boolean", "integer", "number", "object"],
-              "title": "elementN",
-              "examples": ["Device3"]
-            },
-            "suppressFailureMessage": {
-              "type": ["array", "boolean", "null", "number", "object", "string"]
-            }
-          },
-          "required": ["suppressSuccessMessage", "templateName", "templateVariables", "reattempt", "_id", "reattemptWaitTime", "reattemptQuantity", "deviceName", "suppressFailureMessage"]
-        },
-        "outputSchema": {
-          "type": "object",
-          "properties": {
-            "suppressSuccessMessage": {
-              "type": ["array", "boolean", "null", "number", "object", "string"]
-            },
-            "templateName": {
-              "title": "template",
-              "type": "string",
-              "examples": ["show version"]
-            },
-            "templateVariables": {
-              "type": "object",
-              "properties": {},
-              "examples": [
-                {
-                  "device_name": "my-device1"
-                }
-              ]
-            },
-            "reattempt": {
-              "type": ["array", "boolean", "null", "number", "object", "string"]
-            },
-            "_id": {
-              "type": "string",
-              "pattern": "^[0-9a-f]{24}$"
-            },
-            "reattemptWaitTime": {
-              "title": "minutes",
-              "type": "integer",
-              "examples": [1]
-            },
-            "reattemptQuantity": {
-              "title": "attempts",
-              "type": "integer",
-              "examples": [2]
-            },
-            "deviceName": {
-              "type": ["array", "string", "boolean", "integer", "number", "object"],
-              "title": "elementN",
-              "examples": ["Device3"]
-            },
-            "suppressFailureMessage": {
-              "type": ["array", "boolean", "null", "number", "object", "string"]
-            },
-            "initiator": {
-              "type": "string"
-            },
-            "templateResults": {
-              "type": "object",
-              "properties": {
-                "raw": {
-                  "type": "string",
-                  "examples": ["show version"]
-                },
-                "all_pass_flag": {
-                  "type": "boolean"
-                },
-                "evaluated": {
-                  "type": "string",
-                  "examples": ["show version"]
-                },
-                "parameters": {
-                  "type": "object",
-                  "properties": {}
-                },
-                "rules": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "rule": {
-                        "type": "string",
-                        "examples": ["show version"]
-                      },
-                      "eval": {
-                        "type": "string",
-                        "examples": ["contains"]
-                      },
-                      "raw": {
-                        "type": "string",
-                        "examples": ["show version"]
-                      },
-                      "result": {
-                        "type": "boolean"
-                      }
-                    }
-                  }
-                },
-                "device": {
-                  "type": "string",
-                  "examples": ["device1"]
-                },
-                "response": {
-                  "type": "string",
-                  "examples": ["version: 10.0.0"]
-                },
-                "result": {
-                  "type": "boolean"
-                }
-              }
-            },
-            "templateError": {
-              "type": ["array", "boolean", "null", "number", "object", "string"]
-            }
-          }
-        },
-        "createdVersion": "5.46.0-2023.1.30.0",
-        "created_by": {
-          "provenance": "local_aaa",
-          "username": "admin@pronghorn",
-          "firstname": "admin",
-          "inactive": false
-        },
-        "font_size": 12,
-        "lastUpdatedVersion": "5.55.2-2023.2.13",
-        "preAutomationTime": 0,
-        "sla": 0,
-        "type": "automation",
-        "last_updated": "2025-01-24T10:51:28.193Z",
-        "created": "2023-11-15T15:14:12.334Z",
-        "last_updated_by": {
-          "provenance": "Okta",
-          "username": "admin@itential",
-          "firstname": "admin@itential",
-          "inactive": false,
-          "sso": true,
-          "nameID": "admin@itential"
-        },
-        "canvasVersion": 3,
-        "tags": [],
-        "groups": [],
-        "migrationVersion": 3
-      }
-    },
-    {
-      "iid": 2,
-      "reference": "41310c80-c0dc-4a7f-abcf-9efb8b631800",
-      "type": "workflow",
-      "folder": "/Software Upgrade",
-      "document": {
-        "name": "Software Upgrade",
-        "tasks": {
-          "3997": {
-            "name": "transformation",
-            "canvasName": "transformation",
-            "summary": "Software Upgrade - NX-OS",
-            "description": "Software Upgrade - NX-OS",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "tr_id": "65bbf1901205fc02995dbf33",
-                "variableMap": {
-                  "version": "$var.job.version",
-                  "flashMemory": "$var.job.flashMemory"
-                },
-                "options": {
-                  "extractOutput": true,
-                  "validateIncoming": true,
-                  "revertToDefaultValue": true
-                }
-              },
-              "outgoing": {
-                "templateVariables": null
-              },
-              "decorators": []
-            },
-            "actor": "Pronghorn",
-            "groups": [],
-            "nodeLocation": {
-              "x": 168,
-              "y": 468
-            }
-          },
-          "9531": {
-            "name": "childJob",
-            "canvasName": "childJob",
-            "summary": "Verify File",
-            "description": "Validate the integrity and compatibility of the software file",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "task": "",
-                "workflow": "@66d0d1ba21161b4df27174c2: Command Template Runner",
-                "variables": {
-                  "suppressSuccessMessage": {
-                    "task": "job",
-                    "value": "suppressSuccessMessage"
-                  },
-                  "suppressFailureMessage": {
-                    "task": "job",
-                    "value": "suppressFailureMessage"
-                  },
-                  "templateName": {
-                    "task": "static",
-                    "value": "@66d0d1ba21161b4df27174c2: File Verification"
-                  },
-                  "reattempt": {
-                    "task": "static",
-                    "value": false
-                  },
-                  "reattemptWaitTime": {
-                    "task": "static",
-                    "value": 0
-                  },
-                  "reattemptQuantity": {
-                    "task": "static",
-                    "value": 0
-                  },
-                  "templateVariables": {
-                    "task": "3997",
-                    "value": "templateVariables"
-                  },
-                  "deviceName": {
-                    "task": "job",
-                    "value": "deviceName"
-                  }
-                },
-                "data_array": "",
-                "transformation": "",
-                "loopType": ""
-              },
-              "outgoing": {
-                "job_details": ""
-              }
-            },
-            "actor": "job",
-            "groups": [],
-            "nodeLocation": {
-              "x": 168,
-              "y": 576
-            }
-          },
-          "workflow_start": {
-            "name": "workflow_start",
-            "groups": [],
-            "nodeLocation": {
-              "x": 168,
-              "y": 336
-            }
-          },
-          "workflow_end": {
-            "name": "workflow_end",
-            "groups": [],
-            "nodeLocation": {
-              "x": 168,
-              "y": 1536
-            }
-          },
-          "ed72": {
-            "name": "childJob",
-            "canvasName": "childJob",
-            "summary": "Perform Pre-Checks",
-            "description": "Perform pre-upgrade checks",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "task": "",
-                "workflow": "@66d0d1ba21161b4df27174c2: Command Template Runner",
-                "variables": {
-                  "suppressFailureMessage": {
-                    "task": "job",
-                    "value": "suppressFailureMessage"
-                  },
-                  "suppressSuccessMessage": {
-                    "task": "job",
-                    "value": "suppressSuccessMessage"
-                  },
-                  "reattemptQuantity": {
-                    "task": "static",
-                    "value": 0
-                  },
-                  "reattemptWaitTime": {
-                    "task": "static",
-                    "value": 0
-                  },
-                  "reattempt": {
-                    "task": "static",
-                    "value": false
-                  },
-                  "templateVariables": {
-                    "task": "3997",
-                    "value": "templateVariables"
-                  },
-                  "templateName": {
-                    "task": "static",
-                    "value": "@66d0d1ba21161b4df27174c2: Software Upgrade Checks"
-                  },
-                  "deviceName": {
-                    "task": "static",
-                    "value": []
-                  }
-                },
-                "data_array": "",
-                "transformation": "",
-                "loopType": ""
-              },
-              "outgoing": {
-                "job_details": ""
-              }
-            },
-            "actor": "job",
-            "groups": [],
-            "nodeLocation": {
-              "x": 168,
-              "y": 684
-            }
-          },
-          "fc03": {
-            "name": "childJob",
-            "canvasName": "childJob",
-            "summary": "Install",
-            "description": "Execute the installation of the new software",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "task": "",
-                "workflow": "@66d0d1ba21161b4df27174c2: Command Template Runner",
-                "variables": {
-                  "suppressFailureMessage": {
-                    "task": "job",
-                    "value": "suppressFailureMessage"
-                  },
-                  "suppressSuccessMessage": {
-                    "task": "job",
-                    "value": "suppressSuccessMessage"
-                  },
-                  "templateName": {
-                    "task": "static",
-                    "value": "@66d0d1ba21161b4df27174c2: Install"
-                  },
-                  "templateVariables": {
-                    "task": "3997",
-                    "value": "templateVariables"
-                  },
-                  "reattempt": {
-                    "task": "static",
-                    "value": false
-                  },
-                  "reattemptWaitTime": {
-                    "task": "static",
-                    "value": 0
-                  },
-                  "reattemptQuantity": {
-                    "task": "static",
-                    "value": 0
-                  },
-                  "deviceName": {
-                    "task": "static",
-                    "value": []
-                  }
-                },
-                "data_array": "",
-                "transformation": "",
-                "loopType": ""
-              },
-              "outgoing": {
-                "job_details": ""
-              }
-            },
-            "actor": "job",
-            "groups": [],
-            "nodeLocation": {
-              "x": 168,
-              "y": 804
-            }
-          },
-          "0e7b": {
-            "name": "childJob",
-            "canvasName": "childJob",
-            "summary": "Verify After Reload",
-            "description": "Confirm the successful application of the upgraded software by performing version check",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "task": "",
-                "workflow": "@66d0d1ba21161b4df27174c2: Command Template Runner",
-                "variables": {
-                  "suppressFailureMessage": {
-                    "task": "job",
-                    "value": "suppressFailureMessage"
-                  },
-                  "suppressSuccessMessage": {
-                    "task": "job",
-                    "value": "suppressSuccessMessage"
-                  },
-                  "templateName": {
-                    "task": "static",
-                    "value": "@66d0d1ba21161b4df27174c2: Show Version"
-                  },
-                  "templateVariables": {
-                    "task": "3997",
-                    "value": "templateVariables"
-                  },
-                  "reattempt": {
-                    "task": "static",
-                    "value": true
-                  },
-                  "reattemptWaitTime": {
-                    "task": "static",
-                    "value": 1
-                  },
-                  "reattemptQuantity": {
-                    "task": "static",
-                    "value": 20
-                  },
-                  "deviceName": {
-                    "task": "job",
-                    "value": "deviceName"
-                  }
-                },
-                "data_array": "",
-                "transformation": "",
-                "loopType": ""
-              },
-              "outgoing": {
-                "job_details": ""
-              }
-            },
-            "actor": "job",
-            "groups": [],
-            "nodeLocation": {
-              "x": 168,
-              "y": 1044
-            }
-          },
-          "b0ff": {
-            "name": "childJob",
-            "canvasName": "childJob",
-            "summary": "Perform Post-Checks",
-            "description": "Perform post-upgrade checks",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "task": "",
-                "workflow": "@66d0d1ba21161b4df27174c2: Command Template Runner",
-                "variables": {
-                  "suppressFailureMessage": {
-                    "task": "job",
-                    "value": "suppressFailureMessage"
-                  },
-                  "suppressSuccessMessage": {
-                    "task": "job",
-                    "value": "suppressSuccessMessage"
-                  },
-                  "templateName": {
-                    "task": "static",
-                    "value": "@66d0d1ba21161b4df27174c2: Software Upgrade Checks"
-                  },
-                  "templateVariables": {
-                    "task": "3997",
-                    "value": "templateVariables"
-                  },
-                  "reattempt": {
-                    "task": "static",
-                    "value": false
-                  },
-                  "reattemptWaitTime": {
-                    "task": "static",
-                    "value": 0
-                  },
-                  "reattemptQuantity": {
-                    "task": "static",
-                    "value": 0
-                  },
-                  "deviceName": {
-                    "task": "job",
-                    "value": "deviceName"
-                  }
-                },
-                "data_array": "",
-                "transformation": "",
-                "loopType": ""
-              },
-              "outgoing": {
-                "job_details": ""
-              }
-            },
-            "actor": "job",
-            "groups": [],
-            "nodeLocation": {
-              "x": 168,
-              "y": 1164
-            }
-          },
-          "a2a3": {
-            "name": "query",
-            "canvasName": "query",
-            "summary": "Query Pre-Checks",
-            "description": "Query Pre Check",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "pass_on_null": false,
-                "query": "templateResults",
-                "obj": "$var.ed72.job_details"
-              },
-              "outgoing": {
-                "return_data": ""
-              }
-            },
-            "actor": "Pronghorn",
-            "groups": [],
-            "nodeLocation": {
-              "x": 168,
-              "y": 1284
-            }
-          },
-          "0f5d": {
-            "name": "query",
-            "canvasName": "query",
-            "summary": "Query Post-Checks",
-            "description": "Query Pre Check",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "pass_on_null": false,
-                "query": "templateResults",
-                "obj": "$var.b0ff.job_details"
-              },
-              "outgoing": {
-                "return_data": ""
-              }
-            },
-            "actor": "Pronghorn",
-            "groups": [],
-            "nodeLocation": {
-              "x": 492,
-              "y": 1296
-            }
-          },
-          "5bd5": {
-            "name": "evaluation",
-            "canvasName": "evaluation",
-            "summary": "Check If Suppressing Success Message",
-            "description": "Check If Suppressing Success Message",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "all_true_flag": false,
-                "evaluation_groups": [
-                  {
-                    "all_true_flag": false,
-                    "evaluations": [
-                      {
-                        "operand_1": {
-                          "task": "job",
-                          "variable": "suppressSuccessMessage"
-                        },
-                        "operand_2": {
-                          "task": "static",
-                          "variable": true
-                        },
-                        "operator": "==",
-                        "query": "",
-                        "rightQuery": ""
-                      }
-                    ]
-                  }
-                ]
-              },
-              "outgoing": {
-                "return_value": ""
-              }
-            },
-            "actor": "Pronghorn",
-            "groups": [],
-            "nodeLocation": {
-              "x": 168,
-              "y": 1404
-            }
-          },
-          "d6b3": {
-            "name": "runTemplatesDiff",
-            "canvasName": "runTemplatesDiff",
-            "summary": "Compare Pre-Post",
-            "description": "Compare pre- and post-checks",
-            "location": "Application",
-            "app": "MOP",
-            "displayName": "MOP",
-            "type": "manual",
-            "variables": {
-              "incoming": {
-                "pre": "$var.a2a3.return_data",
-                "post": "$var.0f5d.return_data"
-              },
-              "outgoing": {}
-            },
-            "view": "/mop/task/runTemplatesDiff",
-            "groups": [],
-            "nodeLocation": {
-              "x": -156,
-              "y": 1404
-            }
-          },
-          "54c0": {
-            "name": "childJob",
-            "canvasName": "childJob",
-            "summary": "Run Device Connection",
-            "description": "Test if device is alive",
-            "location": "Application",
-            "locationType": null,
-            "app": "WorkFlowEngine",
-            "type": "operation",
-            "displayName": "WorkFlowEngine",
-            "variables": {
-              "incoming": {
-                "task": "",
-                "workflow": "@66d0d1ba21161b4df27174c2: Perform Device Connection",
-                "variables": {
-                  "deviceName": {
-                    "task": "job",
-                    "value": "deviceName"
-                  }
-                },
-                "data_array": "",
-                "transformation": "",
-                "loopType": ""
-              },
-              "outgoing": {
-                "job_details": ""
-              }
-            },
-            "actor": "job",
-            "groups": [],
-            "nodeLocation": {
-              "x": 168,
-              "y": 924
-            }
-          }
-        },
-        "transitions": {
-          "3997": {
-            "9531": {
-              "state": "success",
-              "type": "standard"
-            }
-          },
-          "9531": {
-            "ed72": {
-              "state": "success",
-              "type": "standard"
-            }
-          },
-          "workflow_start": {
-            "3997": {
-              "state": "success",
-              "type": "standard"
-            }
-          },
-          "workflow_end": {},
-          "ed72": {
-            "fc03": {
-              "state": "success",
-              "type": "standard"
-            }
-          },
-          "fc03": {
-            "54c0": {
-              "state": "success",
-              "type": "standard"
-            }
-          },
-          "0e7b": {
-            "b0ff": {
-              "state": "success",
-              "type": "standard"
-            }
-          },
-          "b0ff": {
-            "a2a3": {
-              "state": "success",
-              "type": "standard"
-            },
-            "0f5d": {
-              "state": "success",
-              "type": "standard"
-            }
-          },
-          "a2a3": {
-            "5bd5": {
-              "state": "success",
-              "type": "standard"
-            }
-          },
-          "0f5d": {
-            "5bd5": {
-              "state": "success",
-              "type": "standard"
-            }
-          },
-          "5bd5": {
-            "workflow_end": {
-              "state": "success",
-              "type": "standard"
-            },
-            "d6b3": {
-              "type": "standard",
-              "state": "failure"
-            }
-          },
-          "d6b3": {
-            "workflow_end": {
-              "state": "success",
-              "type": "standard"
-            }
-          },
-          "54c0": {
-            "0e7b": {
-              "state": "success",
-              "type": "standard"
-            }
-          },
-          "eb55": {},
-          "f92": {},
-          "90d3": {},
-          "5fa1": {}
-        },
-        "inputSchema": {
-          "type": "object",
-          "properties": {
-            "version": {
-              "type": "string"
-            },
-            "flashMemory": {
-              "type": "string"
-            },
-            "suppressSuccessMessage": {
-              "type": ["array", "boolean", "null", "number", "object", "string"]
-            },
-            "suppressFailureMessage": {
-              "type": ["array", "boolean", "null", "number", "object", "string"]
-            },
-            "deviceName": {
-              "title": "name",
-              "type": "string",
-              "examples": ["xr9kv-atl"]
-            }
-          },
-          "required": ["version", "flashMemory", "suppressSuccessMessage", "suppressFailureMessage", "deviceName"]
-        },
-        "outputSchema": {
-          "type": "object",
-          "properties": {
-            "version": {
-              "type": "string"
-            },
-            "flashMemory": {
-              "type": "string"
-            },
-            "suppressSuccessMessage": {
-              "type": ["array", "boolean", "null", "number", "object", "string"]
-            },
-            "suppressFailureMessage": {
-              "type": ["array", "boolean", "null", "number", "object", "string"]
-            },
-            "deviceName": {
-              "title": "name",
-              "type": "string",
-              "examples": ["xr9kv-atl"]
-            },
-            "_id": {
-              "type": "string",
-              "pattern": "^[0-9a-f]{24}$"
-            },
-            "initiator": {
-              "type": "string"
-            }
-          }
-        },
-        "createdVersion": "5.46.0-2023.1.19.0",
-        "font_size": 12,
-        "lastUpdatedVersion": "5.55.2-2023.2.13",
-        "preAutomationTime": 0,
-        "sla": 0,
-        "type": "automation",
-        "last_updated": "2025-01-24T10:51:28.192Z",
-        "last_updated_by": {
-          "provenance": "Okta",
-          "username": "admin@itential",
-          "firstname": "admin@itential",
-          "inactive": false,
-          "sso": true,
-          "nameID": "admin@itential"
-        },
-        "created": "1970-01-01T00:00:00.000Z",
-        "canvasVersion": 3,
-        "created_by": {
-          "provenance": "Okta",
-          "username": "admin@itential",
-          "firstname": "admin@itential",
-          "inactive": false,
-          "sso": true,
-          "nameID": "admin@itential"
-        },
-        "tags": [],
-        "groups": [],
-        "migrationVersion": 3
-      }
-    },
-    {
-      "iid": 3,
-      "reference": "65bbf1901205fc02995dbf33",
-      "type": "transformation",
-      "folder": "/Software Upgrade",
-      "document": {
-        "_id": "65bbf1901205fc02995dbf33",
-        "name": "Software Upgrade",
-        "description": "",
-        "incoming": [
-          {
-            "$id": "version",
-            "type": "string"
-          },
-          {
-            "$id": "flashMemory",
-            "type": "string"
-          }
-        ],
-        "outgoing": [
-          {
-            "$id": "templateVariables",
-            "type": "object",
-            "properties": {
-              "version": {
-                "type": "string",
-                "examples": ["14%2E4"]
-              },
-              "flashMemory": {
-                "type": "string",
-                "examples": ["flash:"]
-              }
-            },
-            "required": []
-          }
-        ],
-        "steps": [
-          {
-            "id": 1,
-            "type": "assign",
-            "from": {
-              "location": "incoming",
-              "name": "version",
-              "ptr": ""
-            },
-            "to": {
-              "location": "outgoing",
-              "name": "templateVariables",
-              "ptr": "/version"
-            },
-            "context": "#"
-          },
-          {
-            "id": 2,
-            "type": "assign",
-            "from": {
-              "location": "incoming",
-              "name": "flashMemory",
-              "ptr": ""
-            },
-            "to": {
-              "location": "outgoing",
-              "name": "templateVariables",
-              "ptr": "/flashMemory"
-            },
-            "context": "#"
-          }
-        ],
-        "functions": [],
-        "comments": [],
-        "view": {
-          "col": 1,
-          "row": 5
-        },
-        "created": "2025-01-15T18:44:47.833Z",
-        "createdBy": {
-          "_id": "66d1e2b552e6dc384b5d6626",
-          "provenance": "Okta",
-          "username": "admin@itential"
-        },
-        "lastUpdated": "2025-01-24T10:51:28.195Z",
-        "lastUpdatedBy": {
-          "_id": "66d1e2b552e6dc384b5d6626",
-          "provenance": "Okta",
-          "username": "admin@itential"
-        },
-        "version": "4.3.6-2023.2.5",
-        "tags": []
-      }
-    },
-    {
-      "iid": 4,
-      "reference": "66d0d175cddf0c8da2752c79",
-      "type": "transformation",
-      "folder": "/Command Template Runner",
-      "document": {
-        "_id": "66d0d175cddf0c8da2752c79",
-        "name": "Create Command Template Runner Error Message",
-        "description": "Create Command Template Runner error message",
-        "incoming": [
-          {
-            "$id": "templateName",
-            "type": "string",
-            "examples": ["Template A"]
-          }
-        ],
-        "outgoing": [
-          {
-            "$id": "errorMessage",
-            "type": "string"
-          }
-        ],
-        "steps": [
-          {
-            "id": 2,
-            "type": "assign",
-            "from": {
-              "location": "incoming",
-              "name": "templateName",
-              "ptr": ""
-            },
-            "to": {
-              "location": "template",
-              "name": 1,
-              "ptr": "/args/0/value"
-            },
-            "context": "#"
-          },
-          {
-            "id": 1,
-            "type": "template",
-            "library": "String",
-            "method": "templateLiteral",
-            "template": "The Command Template ${templateName} has errored. See details below. Select \"Retry\" to retry Command Template or select \"Continue\" to continue to end of job.",
-            "args": [null],
-            "view": {
-              "row": 1,
-              "col": 1
-            },
-            "context": "#"
-          },
-          {
-            "id": 3,
-            "type": "assign",
-            "from": {
-              "location": "template",
-              "name": 1,
-              "ptr": "/return"
-            },
-            "to": {
-              "location": "outgoing",
-              "name": "errorMessage",
-              "ptr": ""
-            },
-            "context": "#"
-          }
-        ],
-        "functions": [],
-        "comments": [],
-        "view": {
-          "col": 1,
-          "row": 5
-        },
-        "created": "2025-01-15T18:43:51.744Z",
-        "createdBy": {
-          "_id": "66d1e2b552e6dc384b5d6626",
-          "provenance": "Okta",
-          "username": "admin@itential"
-        },
-        "lastUpdated": "2025-01-24T10:51:28.194Z",
-        "lastUpdatedBy": {
-          "_id": "66d1e2b552e6dc384b5d6626",
-          "provenance": "Okta",
-          "username": "admin@itential"
-        },
-        "version": "4.3.6-2023.2.5",
-        "tags": []
-      }
-    },
     {
       "iid": 8,
       "reference": "@66d0d1ba21161b4df27174c2: File Verification",
       "type": "mopCommandTemplate",
       "folder": "/Software Upgrade",
       "document": {
-        "tags": [],
+        "tags": ["NX-OS"],
         "name": "File Verification",
         "os": "",
         "passRule": true,
@@ -2179,25 +20,25 @@
             "passRule": true,
             "rules": [
               {
-                "rule": "<!version!>",
+                "rule": "NXOS: version <!version!>",
                 "eval": "!contains",
-                "severity": "error",
-                "flags": {
-                  "case": true
-                },
-                "evaluation": "error"
+                "severity": "error"
               }
             ]
           },
           {
-            "command": "dir <!flashMemory!><!version!>",
+            "command": "dir <!image_path!>",
             "passRule": true,
             "rules": [
               {
                 "rule": "No such file or directory",
                 "eval": "!contains",
-                "severity": "error",
-                "evaluation": "pass"
+                "severity": "error"
+              },
+              {
+                "rule": "bytes total",
+                "eval": "contains",
+                "severity": "error"
               }
             ]
           },
@@ -2206,10 +47,20 @@
             "passRule": true,
             "rules": [
               {
-                "rule": "<!version!>",
-                "eval": "!contains",
-                "severity": "error",
-                "evaluation": "error"
+                "rule": "",
+                "eval": "contains",
+                "severity": "error"
+              }
+            ]
+          },
+          {
+            "command": "dir",
+            "passRule": true,
+            "rules": [
+              {
+                "rule": "",
+                "eval": "contains",
+                "severity": "error"
               }
             ]
           }
@@ -2226,23 +77,23 @@
       "type": "mopCommandTemplate",
       "folder": "/Software Upgrade",
       "document": {
-        "tags": [],
+        "tags": ["NX-OS"],
         "name": "Install",
         "os": "",
         "passRule": true,
         "ignoreWarnings": null,
         "commands": [
           {
-            "command": "install all nxos <!flashMemory!><!version!> non-interruptive",
+            "command": "install all nxos <!image_path!> non-interruptive",
             "passRule": false,
             "rules": [
               {
-                "rule": "Do you want to continue with the installation",
+                "rule": "Finishing the upgrade",
                 "eval": "contains",
                 "severity": "error"
               },
               {
-                "rule": "Another install procedure may be in progress.",
+                "rule": "Install has been successful",
                 "eval": "contains",
                 "severity": "error"
               }
@@ -2261,7 +112,7 @@
       "type": "mopCommandTemplate",
       "folder": "/Software Upgrade",
       "document": {
-        "tags": [],
+        "tags": ["NX-OS"],
         "name": "Show Version",
         "os": "",
         "passRule": true,
@@ -2272,7 +123,7 @@
             "passRule": true,
             "rules": [
               {
-                "rule": "<!version!>",
+                "rule": "NXOS: version <!version!>",
                 "eval": "contains",
                 "severity": "error"
               }
@@ -2287,12 +138,12 @@
     },
     {
       "iid": 5,
-      "reference": "@66d0d1ba21161b4df27174c2: Software Upgrade Checks",
+      "reference": "@66d0d1ba21161b4df27174c2: Pre and Post Checks",
       "type": "mopCommandTemplate",
       "folder": "/Software Upgrade",
       "document": {
-        "tags": [],
-        "name": "Software Upgrade Checks",
+        "tags": ["NX-OS"],
+        "name": "Pre and Post Checks",
         "os": "",
         "passRule": true,
         "ignoreWarnings": null,
@@ -3623,6 +1474,814 @@
     },
     {
       "iid": 13,
+      "reference": "8eae12fd-d628-d6aa-7332-b250220e81d8",
+      "type": "workflow",
+      "folder": "/Software Upgrade",
+      "document": {
+        "name": "NX-OS Upgrade",
+        "tasks": {
+          "5518": {
+            "name": "reattempt",
+            "canvasName": "reattempt",
+            "summary": "Reattempt",
+            "description": "Workflow will follow reattempt task's outgoing transition after n minutes of delay.",
+            "location": "Application",
+            "locationType": null,
+            "app": "MOP",
+            "type": "automatic",
+            "displayName": "MOP",
+            "variables": {
+              "incoming": {
+                "job_id": "$var.job._id",
+                "attemptID": "reboot",
+                "minutes": 1,
+                "attempts": 30
+              },
+              "outgoing": {
+                "response": ""
+              }
+            },
+            "actor": "Pronghorn",
+            "groups": [],
+            "nodeLocation": {
+              "x": -324,
+              "y": 228
+            }
+          },
+          "workflow_start": {
+            "name": "workflow_start",
+            "groups": [],
+            "x": 0,
+            "y": 0.5,
+            "nodeLocation": {
+              "x": 0,
+              "y": -660
+            }
+          },
+          "workflow_end": {
+            "name": "workflow_end",
+            "groups": [],
+            "x": 1,
+            "y": 0.5,
+            "nodeLocation": {
+              "x": 0,
+              "y": 732
+            }
+          },
+          "bdec": {
+            "name": "RunCommandTemplate",
+            "canvasName": "RunCommandTemplate",
+            "summary": "Pre Check",
+            "description": "Captures show version, system storage, interfaces, route summary",
+            "location": "Application",
+            "locationType": null,
+            "app": "MOP",
+            "type": "automatic",
+            "displayName": "MOP",
+            "variables": {
+              "incoming": {
+                "template": "@66d0d1ba21161b4df27174c2: Pre and Post Checks",
+                "variables": "$var.a1ef.merged_object",
+                "devices": "$var.job.device"
+              },
+              "outgoing": {
+                "mop_template_results": "$var.job.preCheckOutput"
+              },
+              "error": "",
+              "decorators": []
+            },
+            "groups": [],
+            "actor": "Pronghorn",
+            "scheduled": false,
+            "nodeLocation": {
+              "x": 0,
+              "y": -456
+            }
+          },
+          "d946": {
+            "name": "evaluation",
+            "canvasName": "evaluation",
+            "summary": "Eval Pre-check",
+            "description": "Run an evaluation",
+            "location": "Application",
+            "locationType": null,
+            "app": "WorkFlowEngine",
+            "type": "operation",
+            "displayName": "WorkFlowEngine",
+            "variables": {
+              "incoming": {
+                "all_true_flag": false,
+                "evaluation_groups": [
+                  {
+                    "all_true_flag": false,
+                    "evaluations": [
+                      {
+                        "operand_1": {
+                          "task": "bdec",
+                          "variable": "mop_template_results"
+                        },
+                        "operand_2": {
+                          "task": "static",
+                          "variable": true
+                        },
+                        "operator": "==",
+                        "query": "result",
+                        "rightQuery": ""
+                      }
+                    ]
+                  }
+                ],
+                "options": ""
+              },
+              "outgoing": {
+                "return_value": ""
+              }
+            },
+            "actor": "Pronghorn",
+            "groups": [],
+            "nodeLocation": {
+              "x": 0,
+              "y": -348
+            }
+          },
+          "fe4a": {
+            "name": "RunCommandTemplate",
+            "canvasName": "RunCommandTemplate",
+            "summary": "File Verification",
+            "description": "Captures show version, system storage, interfaces, route summary",
+            "location": "Application",
+            "locationType": null,
+            "app": "MOP",
+            "type": "automatic",
+            "displayName": "MOP",
+            "variables": {
+              "incoming": {
+                "template": "@66d0d1ba21161b4df27174c2: File Verification",
+                "variables": "$var.a1ef.merged_object",
+                "devices": "$var.job.device"
+              },
+              "outgoing": {
+                "mop_template_results": "$var.job.preCheckOutput"
+              },
+              "error": "",
+              "decorators": []
+            },
+            "groups": [],
+            "actor": "Pronghorn",
+            "scheduled": false,
+            "nodeLocation": {
+              "x": 0,
+              "y": -240
+            }
+          },
+          "0e8e": {
+            "name": "evaluation",
+            "canvasName": "evaluation",
+            "summary": "Eval File Verification",
+            "description": "Run an evaluation",
+            "location": "Application",
+            "locationType": null,
+            "app": "WorkFlowEngine",
+            "type": "operation",
+            "displayName": "WorkFlowEngine",
+            "variables": {
+              "incoming": {
+                "all_true_flag": false,
+                "evaluation_groups": [
+                  {
+                    "all_true_flag": false,
+                    "evaluations": [
+                      {
+                        "operand_1": {
+                          "task": "fe4a",
+                          "variable": "mop_template_results"
+                        },
+                        "operand_2": {
+                          "task": "static",
+                          "variable": true
+                        },
+                        "operator": "==",
+                        "query": "result",
+                        "rightQuery": ""
+                      }
+                    ]
+                  }
+                ],
+                "options": ""
+              },
+              "outgoing": {
+                "return_value": ""
+              }
+            },
+            "actor": "Pronghorn",
+            "groups": [],
+            "nodeLocation": {
+              "x": 0,
+              "y": -132
+            }
+          },
+          "d584": {
+            "name": "RunCommandTemplate",
+            "canvasName": "RunCommandTemplate",
+            "summary": "Install",
+            "description": "Installs the staged image with install all; the switch reloads itself",
+            "location": "Application",
+            "locationType": null,
+            "app": "MOP",
+            "type": "automatic",
+            "displayName": "MOP",
+            "variables": {
+              "incoming": {
+                "template": "@66d0d1ba21161b4df27174c2: Install",
+                "variables": "$var.a1ef.merged_object",
+                "devices": "$var.job.device"
+              },
+              "outgoing": {
+                "mop_template_results": "$var.job.installOutput"
+              },
+              "error": "",
+              "decorators": []
+            },
+            "groups": [],
+            "actor": "Pronghorn",
+            "scheduled": false,
+            "nodeLocation": {
+              "x": 0,
+              "y": -24
+            }
+          },
+          "aaf2": {
+            "name": "evaluation",
+            "canvasName": "evaluation",
+            "summary": "Eval Install",
+            "description": "Run an evaluation",
+            "location": "Application",
+            "locationType": null,
+            "app": "WorkFlowEngine",
+            "type": "operation",
+            "displayName": "WorkFlowEngine",
+            "variables": {
+              "incoming": {
+                "all_true_flag": false,
+                "evaluation_groups": [
+                  {
+                    "all_true_flag": false,
+                    "evaluations": [
+                      {
+                        "operand_1": {
+                          "task": "d584",
+                          "variable": "mop_template_results"
+                        },
+                        "operand_2": {
+                          "task": "static",
+                          "variable": true
+                        },
+                        "operator": "==",
+                        "query": "result",
+                        "rightQuery": ""
+                      }
+                    ]
+                  }
+                ],
+                "options": ""
+              },
+              "outgoing": {
+                "return_value": ""
+              }
+            },
+            "actor": "Pronghorn",
+            "groups": [],
+            "nodeLocation": {
+              "x": 0,
+              "y": 84
+            }
+          },
+          "0e8c": {
+            "name": "RunCommandTemplate",
+            "canvasName": "RunCommandTemplate",
+            "summary": "Show Version",
+            "description": "Captures show version, system storage, interfaces, route summary",
+            "location": "Application",
+            "locationType": null,
+            "app": "MOP",
+            "type": "automatic",
+            "displayName": "MOP",
+            "variables": {
+              "incoming": {
+                "template": "@66d0d1ba21161b4df27174c2: Show Version",
+                "variables": "$var.a1ef.merged_object",
+                "devices": "$var.job.device"
+              },
+              "outgoing": {
+                "mop_template_results": "$var.job.preCheckOutput"
+              },
+              "error": "",
+              "decorators": []
+            },
+            "groups": [],
+            "actor": "Pronghorn",
+            "scheduled": false,
+            "nodeLocation": {
+              "x": 0,
+              "y": 192
+            }
+          },
+          "b9a9": {
+            "name": "evaluation",
+            "canvasName": "evaluation",
+            "summary": "Eval Show Version",
+            "description": "Run an evaluation",
+            "location": "Application",
+            "locationType": null,
+            "app": "WorkFlowEngine",
+            "type": "operation",
+            "displayName": "WorkFlowEngine",
+            "variables": {
+              "incoming": {
+                "all_true_flag": false,
+                "evaluation_groups": [
+                  {
+                    "all_true_flag": false,
+                    "evaluations": [
+                      {
+                        "operand_1": {
+                          "task": "0e8c",
+                          "variable": "mop_template_results"
+                        },
+                        "operand_2": {
+                          "task": "static",
+                          "variable": true
+                        },
+                        "operator": "==",
+                        "query": "result",
+                        "rightQuery": ""
+                      }
+                    ]
+                  }
+                ],
+                "options": ""
+              },
+              "outgoing": {
+                "return_value": ""
+              }
+            },
+            "actor": "Pronghorn",
+            "groups": [],
+            "nodeLocation": {
+              "x": 0,
+              "y": 300
+            }
+          },
+          "83a4": {
+            "name": "renderJinja2ContextWithCast",
+            "canvasName": "renderJinja2ContextWithCast",
+            "summary": "Response: Failed Attempts",
+            "description": "Renders jinja2 Context output with data cast.",
+            "location": "Application",
+            "locationType": null,
+            "app": "TemplateBuilder",
+            "type": "automatic",
+            "displayName": "TemplateBuilder",
+            "variables": {
+              "incoming": {
+                "template": "{\"response\":\"failure\", \"message\": \"The software upgrade exhausted attempts, please review for more details.\"}",
+                "variables": {},
+                "castDataType": "object"
+              },
+              "outgoing": {
+                "renderedTemplate": "$var.job.response"
+              }
+            },
+            "actor": "Pronghorn",
+            "groups": [],
+            "nodeLocation": {
+              "x": -324,
+              "y": 624
+            }
+          },
+          "f654": {
+            "name": "renderJinja2ContextWithCast",
+            "canvasName": "renderJinja2ContextWithCast",
+            "summary": "Response: Success",
+            "description": "Renders jinja2 Context output with data cast.",
+            "location": "Application",
+            "locationType": null,
+            "app": "TemplateBuilder",
+            "type": "automatic",
+            "displayName": "TemplateBuilder",
+            "variables": {
+              "incoming": {
+                "template": "{\"response\":\"success\", \"message\": \"The software upgrade was successful.\"}",
+                "variables": {},
+                "castDataType": "object"
+              },
+              "outgoing": {
+                "renderedTemplate": "$var.job.response"
+              }
+            },
+            "actor": "Pronghorn",
+            "groups": [],
+            "nodeLocation": {
+              "x": 0,
+              "y": 624
+            }
+          },
+          "b241": {
+            "name": "RunCommandTemplate",
+            "canvasName": "RunCommandTemplate",
+            "summary": "Post Check",
+            "description": "Captures show version, system storage, interfaces, route summary",
+            "location": "Application",
+            "locationType": null,
+            "app": "MOP",
+            "type": "automatic",
+            "displayName": "MOP",
+            "variables": {
+              "incoming": {
+                "template": "@66d0d1ba21161b4df27174c2: Pre and Post Checks",
+                "variables": "$var.a1ef.merged_object",
+                "devices": "$var.job.device"
+              },
+              "outgoing": {
+                "mop_template_results": "$var.job.preCheckOutput"
+              },
+              "error": "",
+              "decorators": []
+            },
+            "groups": [],
+            "actor": "Pronghorn",
+            "scheduled": false,
+            "nodeLocation": {
+              "x": 0,
+              "y": 408
+            }
+          },
+          "81ea": {
+            "name": "evaluation",
+            "canvasName": "evaluation",
+            "summary": "Eval Post-check",
+            "description": "Run an evaluation",
+            "location": "Application",
+            "locationType": null,
+            "app": "WorkFlowEngine",
+            "type": "operation",
+            "displayName": "WorkFlowEngine",
+            "variables": {
+              "incoming": {
+                "all_true_flag": false,
+                "evaluation_groups": [
+                  {
+                    "all_true_flag": false,
+                    "evaluations": [
+                      {
+                        "operand_1": {
+                          "task": "b241",
+                          "variable": "mop_template_results"
+                        },
+                        "operand_2": {
+                          "task": "static",
+                          "variable": true
+                        },
+                        "operator": "==",
+                        "query": "result",
+                        "rightQuery": ""
+                      }
+                    ]
+                  }
+                ],
+                "options": ""
+              },
+              "outgoing": {
+                "return_value": ""
+              }
+            },
+            "actor": "Pronghorn",
+            "groups": [],
+            "nodeLocation": {
+              "x": 0,
+              "y": 516
+            }
+          },
+          "a1ef": {
+            "name": "merge",
+            "canvasName": "merge",
+            "summary": "Variables Object",
+            "description": "Merge data into a single object",
+            "location": "Application",
+            "locationType": null,
+            "app": "WorkFlowEngine",
+            "type": "operation",
+            "displayName": "WorkFlowEngine",
+            "variables": {
+              "incoming": {
+                "data_to_merge": [
+                  {
+                    "key": "device",
+                    "value": {
+                      "task": "job",
+                      "variable": "device"
+                    }
+                  },
+                  {
+                    "key": "version",
+                    "value": {
+                      "task": "job",
+                      "variable": "version"
+                    }
+                  },
+                  {
+                    "key": "image_path",
+                    "value": {
+                      "task": "job",
+                      "variable": "image_path"
+                    }
+                  }
+                ]
+              },
+              "outgoing": {
+                "merged_object": ""
+              }
+            },
+            "actor": "Pronghorn",
+            "groups": [],
+            "nodeLocation": {
+              "x": 0,
+              "y": -564
+            }
+          }
+        },
+        "transitions": {
+          "5518": {
+            "83a4": {
+              "type": "standard",
+              "state": "failure"
+            },
+            "0e8c": {
+              "state": "success",
+              "type": "revert"
+            }
+          },
+          "workflow_start": {
+            "a1ef": {
+              "state": "success",
+              "type": "standard"
+            }
+          },
+          "workflow_end": {},
+          "bdec": {
+            "d946": {
+              "state": "success",
+              "type": "standard"
+            }
+          },
+          "d946": {
+            "fe4a": {
+              "state": "success",
+              "type": "standard"
+            }
+          },
+          "fe4a": {
+            "0e8e": {
+              "state": "success",
+              "type": "standard"
+            }
+          },
+          "0e8e": {
+            "d584": {
+              "type": "standard",
+              "state": "success"
+            }
+          },
+          "d584": {
+            "aaf2": {
+              "type": "standard",
+              "state": "success"
+            },
+            "5518": {
+              "type": "standard",
+              "state": "error"
+            }
+          },
+          "aaf2": {
+            "0e8c": {
+              "type": "standard",
+              "state": "success"
+            },
+            "5518": {
+              "type": "standard",
+              "state": "failure"
+            }
+          },
+          "0e8c": {
+            "5518": {
+              "type": "standard",
+              "state": "error"
+            },
+            "b9a9": {
+              "state": "success",
+              "type": "standard"
+            }
+          },
+          "b9a9": {
+            "5518": {
+              "type": "standard",
+              "state": "failure"
+            },
+            "b241": {
+              "state": "success",
+              "type": "standard"
+            }
+          },
+          "83a4": {
+            "workflow_end": {
+              "state": "success",
+              "type": "standard"
+            }
+          },
+          "f654": {
+            "workflow_end": {
+              "state": "success",
+              "type": "standard"
+            }
+          },
+          "b241": {
+            "81ea": {
+              "state": "success",
+              "type": "standard"
+            }
+          },
+          "81ea": {
+            "f654": {
+              "state": "success",
+              "type": "standard"
+            }
+          },
+          "a1ef": {
+            "bdec": {
+              "type": "standard",
+              "state": "success"
+            }
+          }
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "_id": {
+              "title": "job_id",
+              "type": "string",
+              "examples": ["12476bef62224efb97684e43"]
+            },
+            "device": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "examples": ["Cisco ASA", "Cisco NX-OS"]
+                  }
+                },
+                {
+                  "title": "name",
+                  "type": "string",
+                  "examples": ["xr9kv-atl"]
+                }
+              ]
+            },
+            "version": {
+              "type": ["array", "boolean", "null", "number", "object", "string"]
+            },
+            "image_path": {
+              "type": ["array", "boolean", "null", "number", "object", "string"]
+            }
+          },
+          "required": ["_id", "device", "version", "image_path"]
+        },
+        "outputSchema": {
+          "type": "object",
+          "properties": {
+            "_id": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{24}$"
+            },
+            "device": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "examples": ["Cisco ASA", "Cisco NX-OS"]
+                  }
+                },
+                {
+                  "title": "name",
+                  "type": "string",
+                  "examples": ["xr9kv-atl"]
+                }
+              ]
+            },
+            "version": {
+              "type": ["array", "boolean", "null", "number", "object", "string"]
+            },
+            "image_path": {
+              "type": ["array", "boolean", "null", "number", "object", "string"]
+            },
+            "initiator": {
+              "type": "string"
+            },
+            "preCheckOutput": {
+              "type": "object",
+              "properties": {
+                "raw": {
+                  "type": "string",
+                  "examples": ["show version"]
+                },
+                "all_pass_flag": {
+                  "type": "boolean"
+                },
+                "evaluated": {
+                  "type": "string",
+                  "examples": ["show version"]
+                },
+                "parameters": {
+                  "type": "object",
+                  "properties": {}
+                },
+                "rules": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "rule": {
+                        "type": "string",
+                        "examples": ["show version"]
+                      },
+                      "eval": {
+                        "type": "string",
+                        "examples": ["contains"]
+                      },
+                      "raw": {
+                        "type": "string",
+                        "examples": ["show version"]
+                      },
+                      "result": {
+                        "type": "boolean"
+                      }
+                    },
+                    "required": ["rule", "eval"]
+                  }
+                },
+                "device": {
+                  "type": "string",
+                  "examples": ["Nokia SR-OS"]
+                },
+                "response": {
+                  "type": "string",
+                  "examples": ["version: 10.0.0"]
+                },
+                "result": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "response": {
+              "title": "renderedTemplate",
+              "type": "object",
+              "examples": [
+                {
+                  "renderedTemplate": "John was born in year 2000"
+                }
+              ]
+            }
+          }
+        },
+        "scenarios": [],
+        "type": "automation",
+        "font_size": 12,
+        "last_updated": "2026-06-25T09:48:15.135Z",
+        "last_updated_by": {
+          "provenance": "CloudAAA",
+          "username": "mike.elrom@itential.com",
+          "firstname": "Mike",
+          "inactive": false
+        },
+        "lastUpdatedVersion": "5.55.5",
+        "uuid": "7b893e09-f2e8-9735-2b34-a6a79cf5c71c",
+        "created": "2026-06-01T16:12:48.382Z",
+        "created_by": {
+          "provenance": "CloudAAA",
+          "username": "mike.elrom@itential.com",
+          "firstname": "Mike",
+          "inactive": false
+        },
+        "createdVersion": "5.55.5",
+        "canvasVersion": 3,
+        "tags": [],
+        "groups": [],
+        "migrationVersion": 8
+      }
+    },
+    {
+      "iid": 14,
       "reference": "59bd82a4-c874-4e72-1bc0-37ec1d530d61",
       "type": "workflow",
       "folder": "/Port Turn Up",
@@ -4281,7 +2940,7 @@
       }
     },
     {
-      "iid": 14,
+      "iid": 15,
       "reference": "56a489ec5b2b438269de3ab4",
       "type": "jsonForm",
       "folder": "/Port Turn Up",
@@ -4532,7 +3191,7 @@
       }
     },
     {
-      "iid": 15,
+      "iid": 16,
       "reference": "5a7f64327f9e5f2008795d76",
       "type": "template",
       "folder": "/Port Turn Up",
@@ -4568,7 +3227,7 @@
       }
     },
     {
-      "iid": 16,
+      "iid": 17,
       "reference": "@66d0d1ba21161b4df27174c2: Pre-Checks",
       "type": "mopCommandTemplate",
       "folder": "/Port Turn Up",
@@ -4598,7 +3257,7 @@
       }
     },
     {
-      "iid": 17,
+      "iid": 18,
       "reference": "@66d0d1ba21161b4df27174c2: Post-Checks",
       "type": "mopCommandTemplate",
       "folder": "/Port Turn Up",
@@ -4632,7 +3291,7 @@
       }
     },
     {
-      "iid": 18,
+      "iid": 19,
       "reference": "29172ff8aa7a4dd112ac0cf5",
       "type": "jsonForm",
       "folder": "/Software Upgrade",
@@ -4643,7 +3302,7 @@
         "lastUpdated": "2026-09-19T00:00:00.000Z",
         "lastUpdatedBy": "itential",
         "name": "Upgrade Form",
-        "description": "Inputs for the NX-OS Software Upgrade workflow.",
+        "description": "Inputs for the NX-OS Upgrade workflow.",
         "struct": {
           "type": "array",
           "items": [
@@ -4658,73 +3317,50 @@
               "binding": false,
               "rel": "item",
               "targetPointer": "/default",
-              "customKey": "deviceName",
+              "customKey": "device",
               "default": "nxos-device1"
             },
             {
               "nodeId": "37f7dcf8-8a54-5b83-defb-df216989773d",
               "type": "string",
               "title": "Target Version",
-              "description": "NX-OS image filename the upgrade targets",
+              "description": "Version string the upgrade targets, as show version prints it",
+              "placeholder": "10.5(3)",
+              "required": true,
+              "readOnly": false,
+              "binding": false,
+              "rel": "item",
+              "targetPointer": "/default",
+              "customKey": "version",
+              "default": "10.5(3)"
+            },
+            {
+              "nodeId": "1a8ec377-d926-fa72-37bb-6a73cceda7f1",
+              "type": "string",
+              "title": "Image Path on Device",
+              "description": "",
               "placeholder": "Select an item",
               "required": true,
               "enum": [
                 {
-                  "id": "1a8ec377-d926-fa72-37bb-6a73cceda7f1",
-                  "label": "nxos64-cs.10.4.5.M.bin",
-                  "value": "nxos64-cs.10.4.5.M.bin"
+                  "id": "f11d9132-069f-136a-d24f-fa5afa59a16c",
+                  "label": "bootflash:///nxos64-cs.10.4.5.M.bin",
+                  "value": "bootflash:///nxos64-cs.10.4.5.M.bin"
                 },
                 {
-                  "id": "f11d9132-069f-136a-d24f-fa5afa59a16c",
-                  "label": "nxos64-cs.10.5.3.F.bin",
-                  "value": "nxos64-cs.10.5.3.F.bin"
+                  "id": "88d9e592-d547-0582-a6b0-59668c611eef",
+                  "label": "bootflash:///nxos64-cs.10.5.3.F.bin",
+                  "value": "bootflash:///nxos64-cs.10.5.3.F.bin"
                 }
               ],
               "enumNames": [
-                {
-                  "id": "88d9e592-d547-0582-a6b0-59668c611eef",
-                  "label": "",
-                  "value": ""
-                },
                 {
                   "id": "6538f5af-7e58-caed-1b15-499d957fa888",
                   "label": "",
                   "value": ""
-                }
-              ],
-              "binding": false,
-              "rel": "collection",
-              "targetPointer": "/enum",
-              "customKey": "version",
-              "default": "nxos64-cs.10.5.3.F.bin"
-            },
-            {
-              "nodeId": "cefa33e9-1248-827a-d77e-e4d39fb63647",
-              "type": "string",
-              "title": "Flash Memory Path",
-              "description": "Filesystem prefix the image is staged on",
-              "placeholder": "Select an item",
-              "required": true,
-              "enum": [
-                {
-                  "id": "92a562df-9397-9be4-835d-5c14c647b063",
-                  "label": "bootflash:///",
-                  "value": "bootflash:///"
                 },
                 {
-                  "id": "e17920aa-d8c3-0f42-e641-e088229d3427",
-                  "label": "usb1:///",
-                  "value": "usb1:///"
-                }
-              ],
-              "enumNames": [
-                {
-                  "id": "56c2b8ff-ea4b-d382-3f85-fef0417c0584",
-                  "label": "",
-                  "value": ""
-                },
-                {
-                  "id": "e2663714-dad5-8ea6-e3de-31ec0882f77b",
+                  "id": "cefa33e9-1248-827a-d77e-e4d39fb63647",
                   "label": "",
                   "value": ""
                 }
@@ -4732,8 +3368,8 @@
               "binding": false,
               "rel": "collection",
               "targetPointer": "/enum",
-              "customKey": "flashMemory",
-              "default": "bootflash:///"
+              "customKey": "image_path",
+              "default": "bootflash:///nxos64-cs.10.5.3.F.bin"
             }
           ]
         },
@@ -4741,12 +3377,12 @@
           "title": "Upgrade Form",
           "description": "",
           "type": "object",
-          "required": ["deviceName", "version", "flashMemory"],
+          "required": ["device", "version", "image_path"],
           "properties": {
-            "deviceName": {
+            "device": {
               "type": "string",
               "title": "Device",
-              "_id": "/properties/deviceName",
+              "_id": "/properties/device",
               "description": "Inventory device name (e.g. 'nxos-device1')",
               "default": "nxos-device1"
             },
@@ -4754,33 +3390,31 @@
               "type": "string",
               "title": "Target Version",
               "_id": "/properties/version",
-              "description": "NX-OS image filename the upgrade targets",
-              "default": "nxos64-cs.10.5.3.F.bin",
-              "enum": ["nxos64-cs.10.4.5.M.bin", "nxos64-cs.10.5.3.F.bin"],
-              "enumNames": ["", ""]
+              "description": "Version string the upgrade targets, as show version prints it",
+              "default": "10.5(3)"
             },
-            "flashMemory": {
+            "image_path": {
               "type": "string",
-              "title": "Flash Memory Path",
-              "_id": "/properties/flashMemory",
-              "description": "Filesystem prefix the image is staged on",
-              "default": "bootflash:///",
-              "enum": ["bootflash:///", "usb1:///"],
+              "title": "Image Path on Device",
+              "_id": "/properties/image_path",
+              "description": "",
+              "default": "bootflash:///nxos64-cs.10.5.3.F.bin",
+              "enum": ["bootflash:///nxos64-cs.10.4.5.M.bin", "bootflash:///nxos64-cs.10.5.3.F.bin"],
               "enumNames": ["", ""]
             }
           }
         },
         "uiSchema": {
-          "deviceName": {
+          "device": {
             "ui:placeholder": "nxos-device1"
           },
           "version": {
+            "ui:placeholder": "10.5(3)"
+          },
+          "image_path": {
             "ui:placeholder": "Select an item"
           },
-          "flashMemory": {
-            "ui:placeholder": "Select an item"
-          },
-          "ui:order": ["deviceName", "version", "flashMemory", "*"]
+          "ui:order": ["device", "version", "image_path", "*"]
         },
         "bindingSchema": {},
         "validationSchema": {},
@@ -4808,19 +3442,11 @@
       "name": "Software Upgrade",
       "children": [
         {
-          "iid": 18,
+          "iid": 19,
           "nodeType": "component"
         },
         {
-          "iid": 0,
-          "nodeType": "component"
-        },
-        {
-          "iid": 2,
-          "nodeType": "component"
-        },
-        {
-          "iid": 3,
+          "iid": 13,
           "nodeType": "component"
         },
         {
@@ -4832,11 +3458,11 @@
           "nodeType": "component"
         },
         {
-          "iid": 6,
+          "iid": 5,
           "nodeType": "component"
         },
         {
-          "iid": 5,
+          "iid": 6,
           "nodeType": "component"
         }
       ]
@@ -4860,15 +3486,11 @@
       "name": "Port Turn Up",
       "children": [
         {
-          "iid": 14,
-          "nodeType": "component"
-        },
-        {
-          "iid": 13,
-          "nodeType": "component"
-        },
-        {
           "iid": 15,
+          "nodeType": "component"
+        },
+        {
+          "iid": 14,
           "nodeType": "component"
         },
         {
@@ -4878,19 +3500,9 @@
         {
           "iid": 17,
           "nodeType": "component"
-        }
-      ]
-    },
-    {
-      "nodeType": "folder",
-      "name": "Command Template Runner",
-      "children": [
-        {
-          "iid": 1,
-          "nodeType": "component"
         },
         {
-          "iid": 4,
+          "iid": 18,
           "nodeType": "component"
         }
       ]

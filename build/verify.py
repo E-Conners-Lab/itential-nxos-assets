@@ -230,12 +230,20 @@ for c in comps:
                      f"{incoming}, expected exactly one error edge from the lookup - "
                      "it will fire on every run and redden a Complete job")
 
-# 9 -- required folders present
-want = {"Inventory Management", "Software Upgrade", "Golden Configuration",
-        "Port Turn Up", "Command Template Runner"}
+# 9 -- exactly the four folders Cisco IOS ships
+want = {"Inventory Management", "Software Upgrade", "Golden Configuration", "Port Turn Up"}
 got = {f["name"] for f in p["folders"]}
-if want - got:
-    fails.append(f"missing folders: {want - got}")
+if want != got:
+    fails.append(f"folders {sorted(got)} != the Cisco IOS set {sorted(want)}")
+
+# 10 -- no child jobs and no JSTs: the happy path is one flat workflow per use case
+for c in comps:
+    doc = c["document"] or {}
+    if c["type"] == "transformation":
+        fails.append(f"transformation (JST) {doc.get('name')!r} shipped")
+    for tid, t in (doc.get("tasks") or {}).items():
+        if t.get("name") in ("childJob", "transformation"):
+            fails.append(f"{doc.get('name')}/{tid}: {t.get('name')} task")
 
 print(f"components: {len(comps)}  folders: {len(p['folders'])}  project _id: {pid}")
 if fails:

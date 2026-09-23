@@ -56,6 +56,7 @@ NX-OS behaviour observed on a real Nexus 9000v (NX-OS 10.4(2)), not assumed:
 | NX-OS Upgrade install step | One **Install** task, `install all nxos <image_path> non-interruptive`, replaces IOS's Get Device Details, Inventory Object, Boot Marker Config, Send Config, Eval Boot Marker and Reload | `install all` runs the compatibility checks, sets the boot variable and reloads the switch in one command, and is Cisco's supported method. An Install that errors because the reload drops the session goes to the same reattempt loop IOS uses after its reload; Show Version proves the new image. The install output is kept in `installOutput` |
 | NX-OS Upgrade checks | File Verification and Show Version match `NXOS: version <version>`; the image check requires a file listing (`bytes total`) and no `No such file or directory` | The exact lines `show version` and `dir` print on NX-OS |
 | Upgrade Form | Same fields as IOS: device, version (as `show version` prints it, e.g. `10.5(3)`), image path | NX-OS Upgrade reads the same inputs as IOS Upgrade |
+| NetBox inventory payload | `read_timeout_override` 1800, not IOS's 600 | A node this workflow creates has to survive this pack's own upgrade: `install all` holds one session well past IOS's 600 s. The README documents 1800 for a hand-built node, and a generated node that disagreed with it would time out mid-install |
 | Golden config device type | `cisco-nx` | That is the name of Config Manager's built-in NX-OS parser. `cisco-nxos` (the NetBox slug) names no parser, and compliance fails with `No config parser found for the given device type` |
 | Golden config lines | No line only restates a default (`feature ssh`, `spanning-tree mode rapid-pvst`, `ssh login-attempts 3`, ...); telnet is `{d/}feature telnet` at `error` severity | `show running-config` on NX-OS omits defaults, so a required default is reported missing on a compliant switch |
 | Golden config lines | `username admin password 5 {/\S+/} role network-admin`; `version {/10\.[45]\([0-9]+\)/} {/Bios:version.*/}` | Matching is whole-line. NX-OS prints the password hash inside the username line and appends `Bios:version` to the version line |
@@ -108,6 +109,13 @@ in the README next to its workflow:
 - **Six `evaluation` tasks have a `success` transition but no `failure` one.** All are
   inherited from Cisco IOS, none introduced (verified by a baseline comparison against
   upstream). Fixing them belongs in its own `fix:` PR.
+- **The netmiko timeouts are reasoned, not measured.** A node built by **Create & Update
+  Inventory from NetBox** now carries the same `read_timeout_override` (1800) the README
+  documents for a hand-built node, sized for `install all` holding one session past ten
+  minutes. Both also carry `session_timeout: 300`, inherited from Cisco IOS. If that caps the
+  session at five minutes it would end a long install whatever the read timeout says. Neither
+  number has been confirmed against a real upgrade, because the install step has not been run
+  on a device; the first real upgrade should settle both.
 - **The NetBox Jinja payload's `credential_map`** carries `CHANGEME_*` placeholders plus the
   `itential` / `password` pair inherited from the Cisco IOS original. NX-OS nodes only ever
   receive a `CHANGEME_*` value.
@@ -142,8 +150,9 @@ down)` with the parent admin-up. That's expected on an unconnected virtual port.
 **Offline checks,** shipped with the build tooling rather than in this PR: project structure and
 references, the four Cisco IOS folders with no child jobs and no JSTs, the AGENTS.md rules, a
 baseline comparison proving no inherited defect was introduced, golden config format and
-device type, README structure and TOC anchors, and 54 mock-connection tests built from real
-NX-OS output.
+device type, README structure and TOC anchors, and 58 mock-connection tests built from real
+NX-OS output -- including a check that the node the NetBox workflow generates carries the same
+netmiko options the README tells a customer to set by hand.
 
 ## Checklist
 

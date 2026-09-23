@@ -183,6 +183,15 @@ for tid, t in inv["tasks"].items():
         tmpl = tmpl.replace(
             "Filters: active devices, must have IP, must have a mapped platform,\n           and platform is NOT Junos.",
             "Filters: active devices, must have an IP, and platform maps to cisco_nxos.")
+        # A node this workflow creates must survive the upgrade this pack ships.
+        # `install all` holds one session for well over ten minutes, so IOS's 600 s
+        # read timeout cuts the install off midway; the README documents 1800 for a
+        # hand-built node and the generated node has to agree with it.
+        old_timeout = "    'read_timeout_override': 600,"
+        new_timeout = "    'read_timeout_override': 1800,"
+        assert old_timeout in tmpl, "netmiko read_timeout_override not found in the payload"
+        tmpl = tmpl.replace(old_timeout, new_timeout)
+
         # NetBox platform slugs vary by install: the upstream map only carries
         # 'cisco-nxos', but real deployments also use bare 'nxos' / 'nx-os'.
         # Accept all three so the render step does not silently drop devices.

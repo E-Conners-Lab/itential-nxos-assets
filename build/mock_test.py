@@ -254,6 +254,22 @@ for text in ("no password strength-check", "copp profile strict", "vrf context m
              "feature interface-vlan"):
     check(f"real running-config renders {text!r} exactly as the trees do", text in real_lines)
 
+# ------------------------------- 5b. the generated node agrees with the README
+# A node built by the NetBox workflow has to survive the upgrade this pack ships,
+# so its netmiko options cannot contradict the ones the README tells a customer to
+# set by hand. IOS's 600 s read timeout cuts `install all` off midway.
+import re as _re
+_readme = open(os.path.join(HERE, "..", "Cisco", "NX-OS", "README.md")).read()
+_block = _re.search(r"```json\n(.*?)```", _readme, _re.S).group(1)
+_documented = json.loads(_block)["attributes"]["itential_driver_options"]["netmiko"]
+_payload_opts = dict(_re.findall(r"'(\w+)':\s+(\d+)",
+                                 WF["Create & Update Inventory from NetBox"]["tasks"]["7814"]
+                                 ["variables"]["incoming"]["template"]))
+for _k in ("read_timeout_override", "session_timeout", "conn_timeout", "banner_timeout"):
+    check(f"NetBox payload's {_k} matches the README's node attributes",
+          int(_payload_opts.get(_k, -1)) == _documented[_k],
+          f"payload {_payload_opts.get(_k)} vs README {_documented[_k]}")
+
 # ------------------------------------------------------------ 6. NX-OS Upgrade
 # The switch in the real captures runs 10.4(2) from bootflash:///nxos64-cs.10.4.2.F.bin.
 upg = WF["NX-OS Upgrade"]

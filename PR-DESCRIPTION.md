@@ -119,8 +119,9 @@ in the README next to its workflow:
 **Import.** The 15-component project was imported through the Platform UI and read back through
 the API: 15 of 15 components in the four folders, and NX-OS Upgrade's tasks, transitions and
 all four upgrade command templates match the shipped file exactly. Checked component by
-component, because the importer can drop a component silently. The three trees were imported
-the same way and match the exported files line for line.
+component, because the importer can drop a component silently. The three trees are unchanged by
+the restructure; they were imported and read back the same way beforehand, and match the exported
+files line for line.
 
 **Real Nexus 9000v.** A private Cisco DevNet sandbox reservation, NX-OS 10.4(2), onboarded
 through Inventory Manager with netmiko's `cisco_nxos` driver and published to Configuration

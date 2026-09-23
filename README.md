@@ -60,8 +60,9 @@ project's components or an existing tree's lines, and it reports no error.
 
 ## Test It on a Real Nexus
 
-See [`devnet/README.md`](./devnet/README.md). Every workflow except NX-OS Upgrade was run that
-way on 2026-09-21 and 2026-09-22; the results are in `PR-DESCRIPTION.md`.
+See [`devnet/README.md`](./devnet/README.md). Every workflow was run that way on 2026-09-21 and
+2026-09-22 -- NX-OS Upgrade up to, but not including, the install that reloads the switch; the
+results are in `PR-DESCRIPTION.md`.
 
 ## Open Before Submitting Upstream
 
